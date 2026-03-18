@@ -32,11 +32,3 @@ To add a new bridge, submit a PR with:
 1. Your bridge code in a new directory (e.g., `maya/`)
 2. An entry in `registry.json`
 3. Update the packaging step in `.github/workflows/release.yml`
-
-## Release
-
-To create a new bridge release:
-```bash
-git tag v0.1.45
-git push origin --tags
-```
