@@ -7,7 +7,7 @@
       "description": "GDScript plugin for Godot 4.x — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
-      "version": "0.1.46",
+      "version": "0.1.45",
       "minArkestrator": "0.1.40",
       "program": "godot",
       "installType": "project",
@@ -16,8 +16,8 @@
         "macos",
         "linux"
       ],
-      "repo": "timvanhelsdingen/arkestrator",
-      "asset": "arkestrator-bridge-godot-v{version}.zip",
+      "repo": "timvanhelsdingen/arkestrator-bridges",
+      "asset": "bridges/godot.zip",
       "sourceDir": "bridges/godot/addons",
       "extractRoot": "arkestrator_bridge",
       "installPath": {
@@ -31,7 +31,7 @@
       "description": "Python addon for Blender 4.2+ — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
-      "version": "0.1.46",
+      "version": "0.1.45",
       "minArkestrator": "0.1.40",
       "program": "blender",
       "installType": "user",
@@ -40,8 +40,8 @@
         "macos",
         "linux"
       ],
-      "repo": "timvanhelsdingen/arkestrator",
-      "asset": "arkestrator-bridge-blender-v{version}.zip",
+      "repo": "timvanhelsdingen/arkestrator-bridges",
+      "asset": "bridges/blender.zip",
       "sourceDir": "bridges/blender",
       "extractRoot": "arkestrator_bridge",
       "installPath": {
@@ -67,7 +67,7 @@
       "description": "Python package for Houdini 20+ — context capture, file apply, HScript/Python execution",
       "author": "Arkestrator",
       "official": true,
-      "version": "0.1.46",
+      "version": "0.1.45",
       "minArkestrator": "0.1.40",
       "program": "houdini",
       "installType": "user",
@@ -76,8 +76,8 @@
         "macos",
         "linux"
       ],
-      "repo": "timvanhelsdingen/arkestrator",
-      "asset": "arkestrator-bridge-houdini-v{version}.zip",
+      "repo": "timvanhelsdingen/arkestrator-bridges",
+      "asset": "bridges/houdini.zip",
       "sourceDir": "bridges/houdini",
       "extractRoot": ".",
       "installPath": {
@@ -103,7 +103,7 @@
       "description": "Standalone Python bridge for ComfyUI — workflow submission, context, command execution",
       "author": "Arkestrator",
       "official": true,
-      "version": "0.1.46",
+      "version": "0.1.45",
       "minArkestrator": "0.1.40",
       "program": "comfyui",
       "installType": "standalone",
@@ -112,8 +112,8 @@
         "macos",
         "linux"
       ],
-      "repo": "timvanhelsdingen/arkestrator",
-      "asset": "arkestrator-bridge-comfyui-v{version}.zip",
+      "repo": "timvanhelsdingen/arkestrator-bridges",
+      "asset": "bridges/comfyui.zip",
       "sourceDir": "bridges/comfyui",
       "extractRoot": "arkestrator_bridge",
       "installPath": {
@@ -127,7 +127,7 @@
       "description": "C# editor scripts for Unity 2022+ — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
-      "version": "0.1.46",
+      "version": "0.1.45",
       "minArkestrator": "0.1.40",
       "program": "unity",
       "installType": "project",
@@ -136,8 +136,8 @@
         "macos",
         "linux"
       ],
-      "repo": "timvanhelsdingen/arkestrator",
-      "asset": "arkestrator-bridge-unity-v{version}.zip",
+      "repo": "timvanhelsdingen/arkestrator-bridges",
+      "asset": "bridges/unity.zip",
       "sourceDir": "bridges/unity",
       "extractRoot": "ArkestratorBridge",
       "installPath": {
@@ -151,7 +151,7 @@
       "description": "Python plugin for UE5 — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
-      "version": "0.1.46",
+      "version": "0.1.45",
       "minArkestrator": "0.1.40",
       "program": "unreal",
       "installType": "engine",
@@ -160,8 +160,8 @@
         "macos",
         "linux"
       ],
-      "repo": "timvanhelsdingen/arkestrator",
-      "asset": "arkestrator-bridge-unreal-v{version}.zip",
+      "repo": "timvanhelsdingen/arkestrator-bridges",
+      "asset": "bridges/unreal.zip",
       "sourceDir": "bridges/unreal",
       "extractRoot": "ArkestratorBridge",
       "installPath": {
