@@ -21,41 +21,36 @@ jobs:
       - name: Package bridge plugins
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          mkdir -p dist/bridges
+          mkdir -p dist
 
           # Godot
           cd godot/addons
-          zip -r "../../dist/bridges/godot.zip" arkestrator_bridge/
+          zip -r "../../dist/arkestrator-bridge-godot-v${VERSION}.zip" arkestrator_bridge/
           cd ../..
 
           # Blender
           cd blender
-          zip -r "../dist/bridges/blender.zip" arkestrator_bridge/
+          zip -r "../dist/arkestrator-bridge-blender-v${VERSION}.zip" arkestrator_bridge/
           cd ..
 
           # Houdini
           cd houdini
-          zip -r "../dist/bridges/houdini.zip" arkestrator_bridge/ arkestrator_bridge.json
+          zip -r "../dist/arkestrator-bridge-houdini-v${VERSION}.zip" arkestrator_bridge/ arkestrator_bridge.json
           cd ..
 
           # ComfyUI
           cd comfyui
-          zip -r "../dist/bridges/comfyui.zip" arkestrator_bridge/
+          zip -r "../dist/arkestrator-bridge-comfyui-v${VERSION}.zip" arkestrator_bridge/
           cd ..
 
           # Unity
           cd unity
-          zip -r "../dist/bridges/unity.zip" ArkestratorBridge/
+          zip -r "../dist/arkestrator-bridge-unity-v${VERSION}.zip" ArkestratorBridge/
           cd ..
 
           # Unreal
           cd unreal
-          zip -r "../dist/bridges/unreal.zip" ArkestratorBridge/
-          cd ..
-
-          # Bundle all into single archive
-          cd dist
-          zip -r "arkestrator-bridges-v${VERSION}.zip" bridges/
+          zip -r "../dist/arkestrator-bridge-unreal-v${VERSION}.zip" ArkestratorBridge/
           cd ..
 
           echo "Packaged bridge plugins:"
@@ -66,5 +61,5 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            dist/arkestrator-bridges-v*.zip
+            dist/arkestrator-bridge-*.zip
             registry.json
