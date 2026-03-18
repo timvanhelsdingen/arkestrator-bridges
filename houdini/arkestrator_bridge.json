@@ -1,0 +1,12 @@
+{
+    "env": [
+        {
+            "ARKESTRATOR_BRIDGE_DIR": "$HOUDINI_PACKAGE_PATH/arkestrator_bridge"
+        },
+        {
+            "HOUDINI_PATH": "$HOUDINI_PATH;$ARKESTRATOR_BRIDGE_DIR;&"
+        }
+    ],
+    "description": "Arkestrator Bridge - connects Houdini to the Arkestrator server",
+    "author": "Tim van Helsdingen"
+}

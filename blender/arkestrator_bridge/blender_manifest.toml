@@ -1,0 +1,16 @@
+schema_version = "1.0.0"
+
+id = "arkestrator_bridge"
+version = "0.1.46"
+name = "Arkestrator Bridge"
+tagline = "Connect Blender to the Arkestrator hub for AI-assisted workflows"
+maintainer = "Arkestrator <noreply@example.com>"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:MIT"]
+
+[permissions]
+network = "Connects to Arkestrator server via WebSocket"
+files = "Reads and writes project files for AI agent results"

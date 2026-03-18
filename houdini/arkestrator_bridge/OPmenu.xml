@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
+  <menu>
+    <scriptItem id="agent_manager_add_to_context">
+      <label>Add to Arkestrator Context</label>
+      <scriptCode><![CDATA[
+try:
+    import arkestrator_bridge as _arkestrator_bridge
+except Exception:
+    from arkestrator_bridge import __init__ as _arkestrator_bridge
+
+try:
+    _arkestrator_bridge.add_current_selection_to_context(kwargs if "kwargs" in locals() else None)
+except Exception as _err:
+    import hou
+    try:
+        hou.ui.displayMessage(
+            "Arkestrator context action failed:\n%s" % _err,
+            severity=hou.severityType.Error,
+        )
+    except Exception:
+        print("[ArkestratorBridge] OPmenu action failed: %s" % _err)
+      ]]></scriptCode>
+    </scriptItem>
+  </menu>
+</menuDocument>

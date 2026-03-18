@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mainMenu>
+  <menuBar>
+    <subMenu id="arkestrator_main_menu">
+      <label>Arkestrator</label>
+      <insertBefore>help_menu</insertBefore>
+      <scriptItem id="h.arkestrator.add_current_selection_to_context">
+        <label>Add Current Selection to Arkestrator Context</label>
+        <scriptCode><![CDATA[
+try:
+    import arkestrator_bridge as _arkestrator_bridge
+except Exception:
+    from arkestrator_bridge import __init__ as _arkestrator_bridge
+
+try:
+    _arkestrator_bridge.add_current_selection_to_context(kwargs if "kwargs" in locals() else None)
+except Exception as _err:
+    import hou
+    try:
+        hou.ui.displayMessage(
+            "Arkestrator context action failed:\n%s" % _err,
+            severity=hou.severityType.Error,
+        )
+    except Exception:
+        print("[ArkestratorBridge] MainMenu action failed: %s" % _err)
+        ]]></scriptCode>
+      </scriptItem>
+    </subMenu>
+  </menuBar>
+</mainMenu>

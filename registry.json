@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "bridges": [
+    {
+      "id": "godot",
+      "name": "Godot Bridge",
+      "description": "GDScript plugin for Godot 4.x — context capture, file apply, command execution",
+      "author": "Arkestrator",
+      "official": true,
+      "version": "0.1.46",
+      "minArkestrator": "0.1.40",
+      "program": "godot",
+      "installType": "project",
+      "platforms": [
+        "windows",
+        "macos",
+        "linux"
+      ],
+      "repo": "timvanhelsdingen/arkestrator",
+      "asset": "arkestrator-bridge-godot-v{version}.zip",
+      "sourceDir": "bridges/godot/addons",
+      "extractRoot": "arkestrator_bridge",
+      "installPath": {
+        "relative": "addons/arkestrator_bridge"
+      },
+      "detect": {}
+    },
+    {
+      "id": "blender",
+      "name": "Blender Bridge",
+      "description": "Python addon for Blender 4.2+ — context capture, file apply, command execution",
+      "author": "Arkestrator",
+      "official": true,
+      "version": "0.1.46",
+      "minArkestrator": "0.1.40",
+      "program": "blender",
+      "installType": "user",
+      "platforms": [
+        "windows",
+        "macos",
+        "linux"
+      ],
+      "repo": "timvanhelsdingen/arkestrator",
+      "asset": "arkestrator-bridge-blender-v{version}.zip",
+      "sourceDir": "bridges/blender",
+      "extractRoot": "arkestrator_bridge",
+      "installPath": {
+        "windows": "%APPDATA%/Blender Foundation/Blender/{appVersion}/extensions/arkestrator_bridge",
+        "macos": "~/Library/Application Support/Blender/{appVersion}/extensions/arkestrator_bridge",
+        "linux": "~/.config/blender/{appVersion}/extensions/arkestrator_bridge"
+      },
+      "detect": {
+        "windows": [
+          "%APPDATA%/Blender Foundation/Blender/"
+        ],
+        "macos": [
+          "~/Library/Application Support/Blender/"
+        ],
+        "linux": [
+          "~/.config/blender/"
+        ]
+      }
+    },
+    {
+      "id": "houdini",
+      "name": "Houdini Bridge",
+      "description": "Python package for Houdini 20+ — context capture, file apply, HScript/Python execution",
+      "author": "Arkestrator",
+      "official": true,
+      "version": "0.1.46",
+      "minArkestrator": "0.1.40",
+      "program": "houdini",
+      "installType": "user",
+      "platforms": [
+        "windows",
+        "macos",
+        "linux"
+      ],
+      "repo": "timvanhelsdingen/arkestrator",
+      "asset": "arkestrator-bridge-houdini-v{version}.zip",
+      "sourceDir": "bridges/houdini",
+      "extractRoot": ".",
+      "installPath": {
+        "windows": "%USERPROFILE%/Documents/houdini{appVersion}/packages",
+        "macos": "~/Library/Preferences/houdini/{appVersion}/packages",
+        "linux": "~/.houdini{appVersion}/packages"
+      },
+      "detect": {
+        "windows": [
+          "%USERPROFILE%/Documents/houdini*/"
+        ],
+        "macos": [
+          "~/Library/Preferences/houdini/"
+        ],
+        "linux": [
+          "~/.houdini*/"
+        ]
+      }
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI Bridge",
+      "description": "Standalone Python bridge for ComfyUI — workflow submission, context, command execution",
+      "author": "Arkestrator",
+      "official": true,
+      "version": "0.1.46",
+      "minArkestrator": "0.1.40",
+      "program": "comfyui",
+      "installType": "standalone",
+      "platforms": [
+        "windows",
+        "macos",
+        "linux"
+      ],
+      "repo": "timvanhelsdingen/arkestrator",
+      "asset": "arkestrator-bridge-comfyui-v{version}.zip",
+      "sourceDir": "bridges/comfyui",
+      "extractRoot": "arkestrator_bridge",
+      "installPath": {
+        "default": "arkestrator_bridge"
+      },
+      "detect": {}
+    },
+    {
+      "id": "unity",
+      "name": "Unity Bridge",
+      "description": "C# editor scripts for Unity 2022+ — context capture, file apply, command execution",
+      "author": "Arkestrator",
+      "official": true,
+      "version": "0.1.46",
+      "minArkestrator": "0.1.40",
+      "program": "unity",
+      "installType": "project",
+      "platforms": [
+        "windows",
+        "macos",
+        "linux"
+      ],
+      "repo": "timvanhelsdingen/arkestrator",
+      "asset": "arkestrator-bridge-unity-v{version}.zip",
+      "sourceDir": "bridges/unity",
+      "extractRoot": "ArkestratorBridge",
+      "installPath": {
+        "relative": "Assets/ArkestratorBridge"
+      },
+      "detect": {}
+    },
+    {
+      "id": "unreal",
+      "name": "Unreal Engine 5 Bridge",
+      "description": "Python plugin for UE5 — context capture, file apply, command execution",
+      "author": "Arkestrator",
+      "official": true,
+      "version": "0.1.46",
+      "minArkestrator": "0.1.40",
+      "program": "unreal",
+      "installType": "engine",
+      "platforms": [
+        "windows",
+        "macos",
+        "linux"
+      ],
+      "repo": "timvanhelsdingen/arkestrator",
+      "asset": "arkestrator-bridge-unreal-v{version}.zip",
+      "sourceDir": "bridges/unreal",
+      "extractRoot": "ArkestratorBridge",
+      "installPath": {
+        "windows": "C:/Program Files/Epic Games/UE_{appVersion}/Engine/Plugins/ArkestratorBridge",
+        "macos": "/Users/Shared/Epic Games/UE_{appVersion}/Engine/Plugins/ArkestratorBridge",
+        "linux": "~/UnrealEngine/Engine/Plugins/ArkestratorBridge"
+      },
+      "detect": {
+        "windows": [
+          "C:/Program Files/Epic Games/UE_*/"
+        ],
+        "macos": [
+          "/Users/Shared/Epic Games/UE_*/"
+        ],
+        "linux": [
+          "~/UnrealEngine/"
+        ]
+      }
+    }
+  ]
+}

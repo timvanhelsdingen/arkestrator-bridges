@@ -1,0 +1,92 @@
+# This file specifies group mask menu entries that should appear in the
+# Group List overlay in the viewport.
+#
+# Menu Label
+# {
+# # python script
+# }
+#
+# Includes Houdini defaults and an Arkestrator helper action so component
+# selection workflows can add context without switching panes.
+
+"3D Connected Geometry"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupPicking(True)
+pane.setGroupListMask('+3d')
+}
+
+"UV Connected Geometry"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupPicking(True)
+pane.setGroupListMask('+uv')
+}
+
+"Geometry Groups"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupPicking(True)
+pane.setGroupListMask('*')
+}
+
+"Cut Geometry for UV Layout"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupListVisible(True)
+pane.setGroupPicking(False)
+pane.setGroupListMask('+cut')
+pane.setPickModifier(hou.pickModifier.Add)
+pane.setPickGeometryType(hou.geometryType.Edges)
+}
+
+"Alembic Paths"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupPicking(True)
+pane.setGroupListMask('@path *')
+pane.setPickGeometryType(hou.geometryType.Primitives)
+}
+
+"Name Attribute"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupPicking(True)
+pane.setGroupListMask('@name *')
+# If the current geo type is points stay in it and don't change to primitives
+# See bug 126350
+if pane.pickGeometryType() != hou.geometryType.Points:
+    pane.setPickGeometryType(hou.geometryType.Primitives)
+}
+
+"Muscle Id Attribute"
+{
+pane = kwargs['pane']
+if isinstance(pane, hou.ContextViewer):
+    pane = pane.sceneViewer()
+pane.setGroupPicking(True)
+pane.setGroupListMask('@muscle_id *')
+pane.setPickGeometryType(hou.geometryType.Primitives)
+}
+
+"Add to Arkestrator Context"
+{
+try:
+    import arkestrator_bridge as _arkestrator_bridge
+except Exception:
+    from arkestrator_bridge import __init__ as _arkestrator_bridge
+
+_arkestrator_bridge.add_current_selection_to_context(kwargs if "kwargs" in locals() else None)
+}
