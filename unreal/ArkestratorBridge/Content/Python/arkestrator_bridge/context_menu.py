@@ -226,6 +226,71 @@ def _selected_material_nodes() -> list[dict]:
     return items
 
 
+def _selected_blueprint_items() -> list[dict]:
+    """Build rich context items for selected Blueprint assets."""
+    from .blueprint_utils import is_blueprint, get_blueprint_info
+    items: list[dict] = []
+    try:
+        selected_assets = list(unreal.EditorUtilityLibrary.get_selected_assets())
+    except Exception:
+        return items
+
+    for asset in selected_assets:
+        if not is_blueprint(asset):
+            continue
+
+        try:
+            asset_name = asset.get_name()
+        except Exception:
+            asset_name = str(asset)
+        try:
+            asset_path = asset.get_path_name()
+        except Exception:
+            asset_path = asset_name
+
+        bp_info = get_blueprint_info(asset)
+
+        # Build human-readable content summary
+        content_lines = [f"Blueprint: {asset_name}"]
+        if bp_info:
+            if bp_info.get("parent_class"):
+                content_lines.append(f"Parent: {bp_info['parent_class']}")
+            comps = bp_info.get("components", [])
+            if comps:
+                content_lines.append(f"Components ({len(comps)}):")
+                for c in comps[:20]:
+                    root_tag = " [root]" if c.get("is_root") else ""
+                    content_lines.append(f"  - {c['name']} ({c['class']}){root_tag}")
+            vars_ = bp_info.get("variables", [])
+            if vars_:
+                content_lines.append(f"Variables ({len(vars_)}):")
+                for v in vars_[:20]:
+                    content_lines.append(f"  - {v['name']}: {v['type']}")
+            funcs = bp_info.get("functions", [])
+            if funcs:
+                content_lines.append(f"Functions ({len(funcs)}): {', '.join(funcs[:20])}")
+            ifaces = bp_info.get("interfaces", [])
+            if ifaces:
+                content_lines.append(f"Interfaces: {', '.join(ifaces)}")
+
+        metadata: dict = {
+            "class": "Blueprint",
+            "selection_kind": "blueprints",
+        }
+        if bp_info:
+            metadata["blueprint"] = bp_info
+
+        items.append({
+            "type": "asset",
+            "name": asset_name,
+            "path": asset_path,
+            "content": "\n".join(content_lines),
+            "metadata": metadata,
+        })
+
+    return items
+
+
 def _on_add_to_context():
     """Callback for the menu item."""
     ws = _get_ws_client()
@@ -237,6 +302,7 @@ def _on_add_to_context():
     asset_items = _selected_assets()
     folder_items = _selected_folder_items()
     material_node_items = _selected_material_nodes()
+    blueprint_items = _selected_blueprint_items()
 
     added = 0
     for grouped in (
@@ -276,12 +342,21 @@ def _on_add_to_context():
             selection_kind="material_nodes",
             items=material_node_items,
         ),
+        _push_grouped_item(
+            ws,
+            item_type="asset",
+            name=f"Selection ({len(blueprint_items)} blueprints)",
+            path="selection://unreal/blueprints",
+            heading="Selected Unreal Blueprints",
+            selection_kind="blueprints",
+            items=blueprint_items,
+        ),
     ):
         if grouped is not None:
             added += 1
 
     if added == 0:
-        unreal.log("[ArkestratorBridge] No selected actors/assets/folders/material nodes")
+        unreal.log("[ArkestratorBridge] No selected actors/assets/folders/material nodes/blueprints")
     elif added == 1:
         unreal.log("[ArkestratorBridge] Added 1 selection group to Arkestrator context")
     else:

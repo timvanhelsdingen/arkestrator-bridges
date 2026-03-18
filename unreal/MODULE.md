@@ -18,7 +18,8 @@ bridges/unreal/
             ├── ws_client.py                    # Pure-stdlib WebSocket client (threaded I/O)
             ├── file_applier.py                 # File change application with path traversal protection
             ├── command_executor.py             # Python exec + UE console command execution
-            └── context_menu.py                 # ToolMenus "Add to Arkestrator Context" menu coverage for level/content-browser surfaces
+            ├── context_menu.py                 # ToolMenus "Add to Arkestrator Context" menu coverage for level/content-browser surfaces
+            └── blueprint_utils.py              # Blueprint introspection (parent class, components, variables, functions, interfaces)
 ```
 
 ## Key Components
@@ -33,7 +34,7 @@ bridges/unreal/
   - WS poll throttled to ~100ms
   - Context push throttled to ~3s
 - **Message dispatch**: `job_complete`, `bridge_command`, `bridge_command_result`, `error`
-- **Editor context**: project root, active level, selected actors/assets/folders/material nodes, engine version, actor count
+- **Editor context**: project root, active level, selected actors/assets/folders/material nodes, engine version, actor count, Blueprint introspection (parent class, components, variables, functions, interfaces) for selected Blueprint assets
 - **Config**: reads `~/.arkestrator/config.json` for apiKey and wsUrl
 - **Public API**: `register()`, `unregister()`, `connect()`, `disconnect()`, `get_bridge()`
 
@@ -67,9 +68,18 @@ bridges/unreal/
   - `ContentBrowser.AssetContextMenu`
   - `ContentBrowser.FolderContextMenu`
   - `LevelEditor.MainMenu.Tools`
-- "Add to Arkestrator Context" pushes current actor, asset, folder, and material-node selections as `bridge_context_item_add`
+- "Add to Arkestrator Context" pushes current actor, asset, folder, material-node, and Blueprint selections as `bridge_context_item_add`
 - Module-level `_next_context_index` counter, resets on reconnect
 - Idempotent registration
+
+### blueprint_utils.py (Blueprint Introspection)
+- `is_blueprint(asset)` - safe `isinstance` check against `unreal.Blueprint`
+- `get_blueprint_info(asset)` - returns dict with parent class, components, variables, functions, interfaces
+- Components via `simple_construction_script.get_all_nodes()` (works since UE4)
+- Variables via generated class CDO property diff against parent class
+- Functions via `function_graphs` attribute or CDO callable diff
+- Interfaces via `implemented_interfaces()` or `generated_class().get_interfaces()`
+- All API calls independently try/excepted; lists capped (50/50/50/20) with `truncated` flag
 
 ## Protocol Messages
 
@@ -100,7 +110,23 @@ bridges/unreal/
       {"name": "Cube", "class": "StaticMeshActor", "path": "/Game/Maps/...", "location": "(0.0, 0.0, 100.0)"}
     ],
     "selected_assets": [
-      {"name": "BP_Door", "class": "Blueprint", "path": "/Game/Blueprints/BP_Door.BP_Door"}
+      {
+        "name": "BP_Door", "class": "Blueprint", "path": "/Game/Blueprints/BP_Door.BP_Door",
+        "blueprint": {
+          "parent_class": "Actor",
+          "parent_class_path": "/Script/Engine.Actor",
+          "components": [
+            {"name": "DefaultSceneRoot", "class": "SceneComponent", "is_root": true},
+            {"name": "DoorMesh", "class": "StaticMeshComponent", "is_root": false}
+          ],
+          "variables": [
+            {"name": "bIsOpen", "type": "bool"},
+            {"name": "OpenSpeed", "type": "float"}
+          ],
+          "functions": ["ToggleDoor", "OnInteract"],
+          "interfaces": ["BPI_Interactable"]
+        }
+      }
     ],
     "selected_folders": [
       {"name": "Blueprints", "path": "/Game/Blueprints"}

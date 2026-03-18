@@ -220,6 +220,23 @@ def _build_editor_context() -> dict:
     except Exception:
         pass
 
+    # Enrich Blueprint assets with introspection data
+    from .blueprint_utils import is_blueprint, get_blueprint_info
+    EditorAssetLib = getattr(unreal, "EditorAssetLibrary", None)
+    for asset_entry in selected_assets:
+        if asset_entry.get("class") != "Blueprint":
+            continue
+        try:
+            asset_obj = None
+            if EditorAssetLib is not None:
+                asset_obj = EditorAssetLib.load_asset(asset_entry["path"])
+            if asset_obj and is_blueprint(asset_obj):
+                bp_info = get_blueprint_info(asset_obj)
+                if bp_info:
+                    asset_entry["blueprint"] = bp_info
+        except Exception:
+            pass
+
     try:
         for folder_path in unreal.EditorUtilityLibrary.get_selected_folder_paths():
             folder_path = str(folder_path or "").strip()
