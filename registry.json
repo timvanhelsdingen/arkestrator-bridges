@@ -45,9 +45,9 @@
       "sourceDir": "bridges/blender",
       "extractRoot": "arkestrator_bridge",
       "installPath": {
-        "windows": "%APPDATA%/Blender Foundation/Blender/{appVersion}/extensions/arkestrator_bridge",
-        "macos": "~/Library/Application Support/Blender/{appVersion}/extensions/arkestrator_bridge",
-        "linux": "~/.config/blender/{appVersion}/extensions/arkestrator_bridge"
+        "windows": "%APPDATA%/Blender Foundation/Blender/{appVersion}/scripts/addons/arkestrator_bridge",
+        "macos": "~/Library/Application Support/Blender/{appVersion}/scripts/addons/arkestrator_bridge",
+        "linux": "~/.config/blender/{appVersion}/scripts/addons/arkestrator_bridge"
       },
       "detect": {
         "windows": [
