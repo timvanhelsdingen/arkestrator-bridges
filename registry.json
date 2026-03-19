@@ -204,7 +204,7 @@
       ],
       "repo": "timvanhelsdingen/arkestrator-bridges",
       "asset": "arkestrator-bridge-fusion-v{version}.zip",
-      "sourceDir": "bridges/fusion",
+      "sourceDir": "blackmagic-fusion",
       "extractRoot": "arkestrator_bridge",
       "installPath": {
         "windows": "%APPDATA%/Blackmagic Design/Fusion/Scripts/Comp/Arkestrator",

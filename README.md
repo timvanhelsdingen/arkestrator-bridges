@@ -12,6 +12,7 @@ Bridge plugins for connecting DCC applications to [Arkestrator](https://github.c
 | ComfyUI | ComfyUI | Standalone | Python bridge — workflow submission, context, command execution |
 | Unity | Unity 2022+ | Per-project | C# editor scripts — context capture, file apply, command execution |
 | Unreal | UE5 | Engine-level | Python plugin — context capture, file apply, command execution |
+| Fusion | Blackmagic Fusion / DaVinci Resolve | User-level | Python script — context capture, file apply, Python/Lua execution |
 
 ## Installation
 

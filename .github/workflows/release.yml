@@ -53,6 +53,11 @@ jobs:
           zip -r "../dist/arkestrator-bridge-unreal-v${VERSION}.zip" ArkestratorBridge/
           cd ..
 
+          # Fusion
+          cd blackmagic-fusion
+          zip -r "../dist/arkestrator-bridge-fusion-v${VERSION}.zip" . -x "coordinator.md" -x "install.py" -x "__pycache__/*" -x "*.pyc"
+          cd ..
+
           echo "Packaged bridge plugins:"
           ls -la dist/
 
