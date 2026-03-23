@@ -98,21 +98,15 @@ def install(config_dir):
     else:
         print(f"  WARNING: Arkestrator.fu not found in {bridge_src}")
 
-    # 2. Copy bridge package -> Config/Arkestrator/
+    # 2. Copy Arkestrator/ package -> Config/Arkestrator/
+    pkg_src = os.path.join(bridge_src, "Arkestrator")
     dest = os.path.join(config_dir, "Arkestrator")
     if os.path.exists(dest):
         shutil.rmtree(dest)
 
-    shutil.copytree(bridge_src, dest, ignore=shutil.ignore_patterns(
-        "__pycache__", "*.pyc", ".git", "install.py", "Arkestrator.fu",
-        "coordinator.md",
+    shutil.copytree(pkg_src, dest, ignore=shutil.ignore_patterns(
+        "__pycache__", "*.pyc", ".git",
     ))
-
-    # 3. Copy the Lua startup script into Config/Arkestrator/
-    lua_src = os.path.join(bridge_src, "arkestrator_startup.lua")
-    lua_dst = os.path.join(dest, "arkestrator_startup.lua")
-    if os.path.isfile(lua_src):
-        shutil.copy2(lua_src, lua_dst)
 
     # 4. Clean up old Scripts/Comp install
     clean_legacy_install(config_dir)
