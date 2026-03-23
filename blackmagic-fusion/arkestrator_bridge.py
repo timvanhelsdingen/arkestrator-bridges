@@ -1,21 +1,22 @@
 """
 Arkestrator Fusion Bridge — main entry point.
 
-Run this script from Fusion's Script menu or Console:
-    Script > Arkestrator > Connect
+Can be launched in two modes:
+  1. Auto-start (headless): via Arkestrator.fu on comp open/create
+     - Connects in the background, no UI panel
+     - Set ARKESTRATOR_HEADLESS=1 env var before running
+  2. Manual (with panel): via Arkestrator menu > Show Panel, or legacy script
+     - Opens the dockable UI panel with connection controls
 
-Or from the Fusion console:
-    run_script("path/to/arkestrator_bridge.py")
-
-Creates a dockable UI panel with connection status, context controls,
-and "Add to Context" buttons. The WebSocket client runs in a background
-thread while Fusion's UI Manager handles the panel.
+The bridge is a singleton — multiple calls reuse the same instance.
 
 Works with:
   - Blackmagic Fusion (standalone)
   - DaVinci Resolve's Fusion page
 """
 
+import importlib
+import importlib.util
 import json
 import os
 import sys
@@ -23,10 +24,38 @@ import threading
 import time
 import traceback
 
-# Ensure the bridge package is importable
-_bridge_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _bridge_dir not in sys.path:
-    sys.path.insert(0, _bridge_dir)
+# ---------------------------------------------------------------------------
+# Bootstrap: register this directory as the "fusion" package so that
+# `from fusion import config` etc. work regardless of the install directory
+# name (blackmagic-fusion, Arkestrator, etc.).
+# ---------------------------------------------------------------------------
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_parent_dir = os.path.dirname(_this_dir)
+
+if _parent_dir not in sys.path:
+    sys.path.insert(0, _parent_dir)
+
+if "fusion" not in sys.modules:
+    _init_path = os.path.join(_this_dir, "__init__.py")
+    if os.path.isfile(_init_path):
+        _spec = importlib.util.spec_from_file_location(
+            "fusion", _init_path,
+            submodule_search_locations=[_this_dir],
+        )
+        _pkg = importlib.util.module_from_spec(_spec)
+        sys.modules["fusion"] = _pkg
+        _spec.loader.exec_module(_pkg)
+
+# Register submodules that haven't been loaded yet
+for _mod_name in ["config", "ws_client", "context_provider", "command_executor", "file_applier"]:
+    _fqn = f"fusion.{_mod_name}"
+    if _fqn not in sys.modules:
+        _mod_path = os.path.join(_this_dir, f"{_mod_name}.py")
+        if os.path.isfile(_mod_path):
+            _mod_spec = importlib.util.spec_from_file_location(_fqn, _mod_path)
+            _mod = importlib.util.module_from_spec(_mod_spec)
+            sys.modules[_fqn] = _mod
+            _mod_spec.loader.exec_module(_mod)
 
 from fusion import config as cfg
 from fusion.ws_client import BridgeWebSocket
@@ -48,6 +77,28 @@ from fusion.context_provider import (
 )
 from fusion.command_executor import execute_commands, SUPPORTED_LANGUAGES
 from fusion.file_applier import apply_file_changes
+
+
+# ---------------------------------------------------------------------------
+# Singleton bridge instance
+# ---------------------------------------------------------------------------
+
+_bridge_instance = None
+_bridge_lock = threading.Lock()
+
+
+def get_bridge():
+    """Return the existing bridge instance, or None."""
+    return _bridge_instance
+
+
+def get_or_create_bridge(fusion_app, log_fn=None):
+    """Return the singleton bridge, creating it if needed."""
+    global _bridge_instance
+    with _bridge_lock:
+        if _bridge_instance is None:
+            _bridge_instance = FusionBridge(fusion_app, log_fn=log_fn)
+        return _bridge_instance
 
 
 # ---------------------------------------------------------------------------
@@ -708,15 +759,36 @@ def create_ui_panel(bridge):
 # ---------------------------------------------------------------------------
 
 def main():
-    """Launch the Arkestrator Fusion bridge."""
+    """Launch the Arkestrator Fusion bridge.
+
+    Behaviour depends on environment:
+      ARKESTRATOR_HEADLESS=1  -> connect silently, no UI panel
+      Otherwise               -> open the UI panel (legacy / manual mode)
+    """
     fusion_app = get_fusion_app()
     if fusion_app is None:
         print("[Arkestrator] ERROR: Could not find Fusion application.")
         print("  Make sure this script is run from within Fusion or DaVinci Resolve.")
         return
 
-    bridge = FusionBridge(fusion_app)
-    create_ui_panel(bridge)
+    bridge = get_or_create_bridge(fusion_app)
+
+    headless = os.environ.get("ARKESTRATOR_HEADLESS", "0") == "1"
+
+    if headless:
+        # Auto-start mode: just connect in background, no UI
+        if bridge.connected:
+            print("[Arkestrator] Already connected (headless)")
+            return
+        conf = cfg.read_config()
+        if conf and cfg.get_api_key(conf):
+            print("[Arkestrator] Auto-connecting (headless)...")
+            bridge.connect()
+        else:
+            print("[Arkestrator] No config/API key found — skipping auto-connect")
+    else:
+        # Manual mode: show the UI panel
+        create_ui_panel(bridge)
 
 
 if __name__ == "__main__":

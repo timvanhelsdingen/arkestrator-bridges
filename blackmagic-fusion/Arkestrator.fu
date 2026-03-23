@@ -1,0 +1,99 @@
+{
+    -- =========================================================================
+    -- Arkestrator.fu — Auto-start config for Fusion / DaVinci Resolve
+    --
+    -- Place this file in Fusion's Config/ directory.
+    -- It registers an Arkestrator menu and auto-connects on comp open/create.
+    -- =========================================================================
+
+    Action {
+        ID = "Arkestrator_Connect",
+        Category = "Arkestrator",
+        Name = "Connect",
+        Targets = {
+            Composition = {
+                Execute = _Lua [=[
+                    local scriptPath = app:MapPath("Config:/Arkestrator/arkestrator_connect.py")
+                    if bmd.fileexists(scriptPath) then
+                        target:RunScript(scriptPath)
+                    else
+                        print("[Arkestrator] Connect script not found: " .. scriptPath)
+                    end
+                ]=],
+            },
+        },
+    },
+
+    Action {
+        ID = "Arkestrator_Disconnect",
+        Category = "Arkestrator",
+        Name = "Disconnect",
+        Targets = {
+            Composition = {
+                Execute = _Lua [=[
+                    local scriptPath = app:MapPath("Config:/Arkestrator/arkestrator_disconnect.py")
+                    if bmd.fileexists(scriptPath) then
+                        target:RunScript(scriptPath)
+                    else
+                        print("[Arkestrator] Disconnect script not found: " .. scriptPath)
+                    end
+                ]=],
+            },
+        },
+    },
+
+    Action {
+        ID = "Arkestrator_ShowPanel",
+        Category = "Arkestrator",
+        Name = "Show Panel",
+        Targets = {
+            Composition = {
+                Execute = _Lua [=[
+                    local scriptPath = app:MapPath("Config:/Arkestrator/arkestrator_panel.py")
+                    if bmd.fileexists(scriptPath) then
+                        target:RunScript(scriptPath)
+                    else
+                        print("[Arkestrator] Panel script not found: " .. scriptPath)
+                    end
+                ]=],
+            },
+        },
+    },
+
+    Event {
+        Targets = {
+            Composition = {
+                OnOpen = {
+                    _Lua [=[
+                        -- Auto-start the bridge when a composition is opened
+                        local startupPath = app:MapPath("Config:/Arkestrator/arkestrator_startup.lua")
+                        if bmd.fileexists(startupPath) then
+                            target:RunScript(startupPath)
+                        end
+                    ]=],
+                },
+                OnNew = {
+                    _Lua [=[
+                        -- Auto-start the bridge when a new composition is created
+                        local startupPath = app:MapPath("Config:/Arkestrator/arkestrator_startup.lua")
+                        if bmd.fileexists(startupPath) then
+                            target:RunScript(startupPath)
+                        end
+                    ]=],
+                },
+            },
+        },
+    },
+
+    Menus {
+        Target = "ChildFrame",
+        Before "Help" {
+            Sub "Arkestrator" {
+                "Arkestrator_Connect{}",
+                "Arkestrator_Disconnect{}",
+                "_",
+                "Arkestrator_ShowPanel{}",
+            },
+        },
+    },
+}
