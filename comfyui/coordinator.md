@@ -22,6 +22,20 @@ Use `am skills search <query>` or `am skills list --program comfyui` to discover
 3. Poll completion and collect errors.
 4. Verify output files and metadata (max 3 retries).
 
+## Best Practices — File & Workflow Organization
+- Save workflow JSON files to a `workflows/` directory, organized by purpose
+- Name workflows descriptively (e.g. `txt2img_sdxl_hires.json`, not `workflow (2).json`)
+- Place custom nodes/scripts in ComfyUI's `custom_nodes/` directory
+- Use the standard model directory structure:
+  - Checkpoints in `models/checkpoints/`
+  - LoRAs in `models/loras/`
+  - VAEs in `models/vae/`
+  - ControlNet models in `models/controlnet/`
+  - Upscale models in `models/upscale_models/`
+- Save generated outputs organized by workflow or project in `output/<project>/`
+- Never hardcode absolute model paths in workflows — use model names that resolve through ComfyUI's search paths
+- When delivering outputs to other workers, stage them in a clear output directory first
+
 ## Quality Requirements
 - Confirm workflow completion in history
 - Verify outputs exist, are non-zero, and match requested type/format

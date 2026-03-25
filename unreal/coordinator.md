@@ -22,6 +22,22 @@ Use `am skills search <query>` or `am skills list --program unreal` to discover 
 3. Fix errors immediately (max 3 fix loops).
 4. Verify actor/asset state.
 
+## Best Practices — Project Organization
+- Follow Unreal Engine content structure:
+  - Use `/Game/` as the content root
+  - Organize by feature: `/Game/Characters/`, `/Game/Environments/`, `/Game/UI/`
+  - Blueprints in feature folders alongside related assets
+  - Materials in `/Game/Materials/` or within feature folders
+  - Textures in `/Game/Textures/` or within feature folders
+  - Meshes in `/Game/Meshes/` or `/Game/StaticMeshes/`
+  - Maps/levels in `/Game/Maps/`
+  - Imported source assets in `/Game/Source/`
+- Use PascalCase for assets: `BP_PlayerCharacter`, `M_GrassMaterial`, `T_RockDiffuse`
+- Prefix conventions: `BP_` (Blueprint), `M_` (Material), `MI_` (Material Instance), `T_` (Texture), `SM_` (Static Mesh), `SK_` (Skeletal Mesh), `ABP_` (Anim Blueprint), `WBP_` (Widget Blueprint)
+- Never use `/Game/` root directly for assets — always organize in subfolders
+- Use `unreal.EditorAssetLibrary` for asset operations, not direct filesystem manipulation
+- Save assets and levels after modifications
+
 ## Quality Requirements
 - Verify created/edited actors/assets exist and are valid
 - Verify properties/locations/paths match request

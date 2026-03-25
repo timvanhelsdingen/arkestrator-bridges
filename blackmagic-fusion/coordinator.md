@@ -22,6 +22,17 @@ Use `am skills search <query>` or `am skills list --program fusion` to discover 
 3. Read output and fix errors (max 3 fix loops).
 4. Verify state with a follow-up check script.
 
+## Best Practices — Comp & File Organization
+- Save comp files (`.comp`) in a project-level `comps/` or `fusion/` directory
+- Save rendered output to `renders/` or `output/` relative to the project
+- Name tools descriptively: `MediaIn_Plate`, `Merge_FG_BG`, `CC_Grade_Hero` — not default names like `Merge1`
+- Group related tools visually with underlay nodes for readability
+- Use Loader/Saver paths relative to the project root when possible
+- Keep footage/plates in a `footage/` or `plates/` folder
+- Save masks and mattes to `mattes/`
+- Use consistent frame padding in output paths (e.g. `render_####.exr`)
+- Create output directories before rendering if they don't exist
+
 ## Quality Requirements
 - Verify tools exist with expected names, types, and connections
 - Wrap multi-step edits in `comp.Lock()` / `comp.Unlock()` to avoid UI thrashing

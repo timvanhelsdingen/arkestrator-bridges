@@ -22,6 +22,23 @@ Use `am skills search <query>` or `am skills list --program unity` to discover a
 3. Re-read bridge context and verify changes.
 4. Fix and retry on mismatch (max 3 fix loops).
 
+## Best Practices — Project Organization
+- Follow the Unity project structure conventions:
+  - Scripts in `Assets/Scripts/` organized by feature or system
+  - Scenes in `Assets/Scenes/`
+  - Prefabs in `Assets/Prefabs/`
+  - Materials in `Assets/Materials/`
+  - Textures in `Assets/Textures/`
+  - Models in `Assets/Models/`
+  - Audio in `Assets/Audio/`
+  - UI assets in `Assets/UI/`
+  - Shaders in `Assets/Shaders/`
+- Never place files directly in `Assets/` root — always use organized subfolders
+- Name assets with PascalCase (e.g. `PlayerController`, `GrassTexture_01`)
+- Use meaningful folder nesting for large projects (e.g. `Assets/Characters/Player/`)
+- Keep scene hierarchy organized with empty GameObjects as folders
+- Use `AssetDatabase.Refresh()` after creating or moving assets programmatically
+
 ## Quality Requirements
 - Verify target objects/scenes/assets exist and are correct
 - Confirm scene save/asset refresh when applicable

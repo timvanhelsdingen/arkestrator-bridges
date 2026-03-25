@@ -23,6 +23,20 @@ Use `am skills search <query>` or `am skills list --program houdini` to discover
 4. Fix failures before continuing (max 3 fix loops).
 5. Cache/render only after upstream validation passes.
 
+## Best Practices — File & Project Organization
+- Save geometry caches to `$HIP/geo/` (create the folder if needed)
+- Save USD/USDA exports to `$HIP/usd/`
+- Save VEX snippets/includes to `$HIP/vex/`
+- Save simulation caches (FLIP, pyro, RBD) to `$HIP/cache/<simtype>/`
+- Save renders to `$HIP/render/`
+- Save texture/image outputs to `$HIP/tex/`
+- Use `$HIP`-relative paths everywhere — never hardcode absolute paths
+- Name nodes descriptively (e.g. `scatter_rocks`, `flip_ocean`, not `geo1`, `null1`)
+- Use null nodes as clear output markers at the end of chains
+- Keep the /obj level organized: one object per logical asset or setup
+- Put reusable HDA definitions in `$HIP/hda/` if creating custom operators
+- Always set the file path on File Cache SOPs before cooking — verify the directory exists
+
 ## Quality Requirements
 - Verify nodes and wiring exist with correct parameters
 - Verify outputs resolve to disk where relevant

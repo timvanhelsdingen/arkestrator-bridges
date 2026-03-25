@@ -22,6 +22,18 @@ Use `am skills search <query>` or `am skills list --program blender` to discover
 3. Read output and fix errors (max 3 fix loops).
 4. Verify state with a follow-up check script.
 
+## Best Practices — File & Project Organization
+- Save .blend files in the project root or a `blend/` subfolder
+- Save textures and images to `textures/` relative to the .blend file
+- Save rendered output to `renders/` or `output/`
+- Save exported models (FBX, glTF, OBJ, USD) to `exports/`
+- Use relative paths in all file references (File > External Data > Make All Paths Relative)
+- Name objects, materials, and collections descriptively (e.g. `Rock_Cliff_01`, not `Cube.003`)
+- Organize scenes with collections: group by purpose (environment, characters, lighting, cameras)
+- Purge unused data blocks before saving (`bpy.ops.outliner.orphans_purge()`)
+- When creating new assets, check if directories exist first — create them with `os.makedirs(..., exist_ok=True)`
+- Set output paths on render nodes before rendering — verify the target directory exists
+
 ## Quality Requirements
 - Verify operations succeed (check return values, object existence, transforms)
 - Handle errors gracefully with try/except
