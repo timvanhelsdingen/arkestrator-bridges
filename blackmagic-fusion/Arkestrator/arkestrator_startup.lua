@@ -1,6 +1,9 @@
 -- Arkestrator auto-start script
 -- Called by Arkestrator.fu on composition open/create.
 -- Launches the Python bridge in headless (background) mode.
+--
+-- The bridge stays alive because main() runs Fusion's UIDispatcher.RunLoop()
+-- which keeps the fuscript.exe process alive for the entire session.
 
 local bridgePath = app:MapPath("Config:/Arkestrator/arkestrator_bridge.py")
 if not bmd.fileexists(bridgePath) then
@@ -8,21 +11,18 @@ if not bmd.fileexists(bridgePath) then
     return
 end
 
--- Check if bridge is already running by looking for the global flag
+-- Guard: prevent multiple launches within the same Fusion session
 if ARKESTRATOR_RUNNING then
     print("[Arkestrator] Bridge already running, skipping auto-start")
     return
 end
 
--- Set global flag before launching
 ARKESTRATOR_RUNNING = true
 
--- Run the bridge in headless mode via environment variable
--- The Python bridge checks this to skip the UI panel
+-- Set headless mode so the bridge uses the hidden event loop (not the UI panel)
 comp:Execute([[
 import os
 os.environ["ARKESTRATOR_HEADLESS"] = "1"
-os.environ["ARKESTRATOR_AUTOSTART"] = "1"
 ]])
 
 comp:RunScript(bridgePath)

@@ -7,8 +7,29 @@ import importlib.util
 import os
 import sys
 
-# Bootstrap the fusion package from this directory
-_this_dir = os.path.dirname(os.path.abspath(__file__))
+
+def _resolve_arkestrator_dir():
+    """Resolve the Arkestrator package directory via Fusion API or __file__."""
+    if "__file__" in dir() or "__file__" in globals():
+        try:
+            return os.path.dirname(os.path.abspath(__file__))
+        except NameError:
+            pass
+    for _g in ("fusion", "fu", "app", "comp"):
+        _obj = globals().get(_g)
+        if _obj is not None and hasattr(_obj, "MapPath"):
+            try:
+                mapped = str(_obj.MapPath("Config:/Arkestrator/") or "")
+                if mapped and os.path.isdir(mapped):
+                    return mapped.rstrip("/\\")
+            except Exception:
+                pass
+    return None
+
+
+_this_dir = _resolve_arkestrator_dir()
+if _this_dir is None:
+    raise RuntimeError("[Arkestrator] Cannot resolve Arkestrator directory")
 _parent_dir = os.path.dirname(_this_dir)
 
 if _parent_dir not in sys.path:

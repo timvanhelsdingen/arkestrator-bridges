@@ -60,12 +60,34 @@
         },
     },
 
+    Action {
+        ID = "Arkestrator_AddToContext",
+        Category = "Arkestrator",
+        Name = "Add to Context",
+        Targets = {
+            Composition = {
+                Execute = _Lua [=[
+                    local scriptPath = app:MapPath("Config:/Arkestrator/arkestrator_add_context.py")
+                    if bmd.fileexists(scriptPath) then
+                        target:RunScript(scriptPath)
+                    else
+                        print("[Arkestrator] Add-to-context script not found: " .. scriptPath)
+                    end
+                ]=],
+            },
+        },
+    },
+
+    Hotkeys {
+        Target = "FlowView",
+        SHIFT_CTRL_A = "Arkestrator_AddToContext",
+    },
+
     Event {
         Targets = {
             Composition = {
                 OnOpen = {
                     _Lua [=[
-                        -- Auto-start the bridge when a composition is opened
                         local startupPath = app:MapPath("Config:/Arkestrator/arkestrator_startup.lua")
                         if bmd.fileexists(startupPath) then
                             target:RunScript(startupPath)
@@ -74,7 +96,6 @@
                 },
                 OnNew = {
                     _Lua [=[
-                        -- Auto-start the bridge when a new composition is created
                         local startupPath = app:MapPath("Config:/Arkestrator/arkestrator_startup.lua")
                         if bmd.fileexists(startupPath) then
                             target:RunScript(startupPath)
@@ -92,6 +113,7 @@
                 "Arkestrator_Connect{}",
                 "Arkestrator_Disconnect{}",
                 "_",
+                "Arkestrator_AddToContext{}",
                 "Arkestrator_ShowPanel{}",
             },
         },

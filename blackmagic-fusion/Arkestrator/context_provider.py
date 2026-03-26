@@ -79,9 +79,9 @@ def build_editor_context(fusion_app, comp):
 
     # Active tool
     active_tool = _safe_call(lambda: comp.ActiveTool)
-    active_file = ""
-    if active_tool:
-        active_file = _safe_call(lambda: active_tool.Name) or ""
+    # activeFile = comp filename (used by server to derive bridge display name)
+    # Do NOT set this to the tool name — that would rename the bridge on every tool click
+    active_file = filename
 
     # Metadata — collect everything useful
     metadata = {

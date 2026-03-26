@@ -54,7 +54,9 @@ class BridgeWebSocket:
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()
-        self._thread = threading.Thread(target=self._run_loop, daemon=True, name="ark-ws")
+        self._thread = threading.Thread(
+            target=self._run_loop, daemon=True, name="ark-ws"
+        )
         self._thread.start()
 
     def stop(self):
@@ -89,6 +91,18 @@ class BridgeWebSocket:
                 return True
         except Exception as exc:
             self._log(f"[ws] send error: {exc}")
+        return False
+
+    def send_json(self, obj):
+        """Send a raw JSON object."""
+        try:
+            with self._lock:
+                ws = self._ws
+            if ws and self._connected.is_set():
+                ws.send(json.dumps(obj))
+                return True
+        except Exception as exc:
+            self._log(f"[ws] send_json error: {exc}")
         return False
 
     # -- internal ------------------------------------------------------------

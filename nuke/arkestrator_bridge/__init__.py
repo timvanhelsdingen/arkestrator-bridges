@@ -505,8 +505,12 @@ def add_selected_nodes_to_context(kwargs: dict | None = None) -> int:
         return 0
 
     nodes = nuke.selectedNodes()
+    # Fallback: menu clicks can sometimes clear selection state before the
+    # callback fires.  Re-check via the 'selected' knob on all nodes.
     if not nodes:
-        nuke.message("No nodes selected. Select nodes first.")
+        nodes = [n for n in nuke.allNodes() if n.knob("selected") and n["selected"].value()]
+    if not nodes:
+        print("[ArkestratorBridge] No nodes selected.")
         return 0
 
     added = 0

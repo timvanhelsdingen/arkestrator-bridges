@@ -29,7 +29,30 @@ import traceback
 # `from fusion import config` etc. work regardless of the install directory
 # name (blackmagic-fusion, Arkestrator, etc.).
 # ---------------------------------------------------------------------------
-_this_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+def _resolve_arkestrator_dir():
+    """Resolve the Arkestrator package directory via Fusion API or __file__."""
+    if "__file__" in dir() or "__file__" in globals():
+        try:
+            return os.path.dirname(os.path.abspath(__file__))
+        except NameError:
+            pass
+    for _g in ("fusion", "fu", "app", "comp"):
+        _obj = globals().get(_g)
+        if _obj is not None and hasattr(_obj, "MapPath"):
+            try:
+                mapped = str(_obj.MapPath("Config:/Arkestrator/") or "")
+                if mapped and os.path.isdir(mapped):
+                    return mapped.rstrip("/\\")
+            except Exception:
+                pass
+    return None
+
+
+_this_dir = _resolve_arkestrator_dir()
+if _this_dir is None:
+    raise RuntimeError("[Arkestrator] Cannot resolve Arkestrator directory")
 _parent_dir = os.path.dirname(_this_dir)
 
 if _parent_dir not in sys.path:
@@ -81,24 +104,33 @@ from fusion.file_applier import apply_file_changes
 
 # ---------------------------------------------------------------------------
 # Singleton bridge instance
+#
+# Fusion's comp:RunScript() runs each script in a fresh module context, so
+# module-level globals do NOT persist across calls.  We store the singleton
+# on Python's `builtins` module, which is shared by the entire interpreter
+# session and survives across RunScript invocations.
 # ---------------------------------------------------------------------------
 
-_bridge_instance = None
+import builtins as _builtins
+
 _bridge_lock = threading.Lock()
+_BUILTIN_KEY = "_arkestrator_fusion_bridge"
 
 
 def get_bridge():
     """Return the existing bridge instance, or None."""
-    return _bridge_instance
+    return getattr(_builtins, _BUILTIN_KEY, None)
 
 
 def get_or_create_bridge(fusion_app, log_fn=None):
     """Return the singleton bridge, creating it if needed."""
-    global _bridge_instance
     with _bridge_lock:
-        if _bridge_instance is None:
-            _bridge_instance = FusionBridge(fusion_app, log_fn=log_fn)
-        return _bridge_instance
+        existing = getattr(_builtins, _BUILTIN_KEY, None)
+        if existing is not None:
+            return existing
+        bridge = FusionBridge(fusion_app, log_fn=log_fn)
+        setattr(_builtins, _BUILTIN_KEY, bridge)
+        return bridge
 
 
 # ---------------------------------------------------------------------------
@@ -646,6 +678,13 @@ def create_ui_panel(bridge):
     def on_connect(ev):
         ui_log("[ui] Connecting...")
         bridge.connect()
+        # Give WS thread time to establish connection
+        time.sleep(1.5)
+        update_status()
+        if bridge.connected:
+            ui_log("[ui] Connected!")
+        else:
+            ui_log("[ui] Connection failed — check config")
 
     def on_disconnect(ev):
         ui_log("[ui] Disconnecting...")
@@ -653,11 +692,24 @@ def create_ui_panel(bridge):
         update_status()
 
     def on_add_selected(ev):
+        ui_log(f"[ui] add_selected: connected={bridge.connected}")
         if not bridge.connected:
-            ui_log("[ui] Not connected")
+            ui_log("[ui] Not connected — click Connect first")
             return
-        count = bridge.add_selected_to_context()
-        ui_log(f"[ui] Added {count} selected tools")
+        try:
+            comp = get_comp(bridge.fusion)
+            ui_log(f"[ui] comp={comp}")
+            if comp:
+                tools = comp.GetToolList(True)
+                ui_log(f"[ui] selected tools raw: {tools}")
+                all_tools = comp.GetToolList(False)
+                ui_log(f"[ui] all tools count: {len(all_tools) if all_tools else 0}")
+            count = bridge.add_selected_to_context()
+            ui_log(f"[ui] Added {count} selected tools")
+        except Exception as exc:
+            ui_log(f"[ui] ERROR: {exc}")
+            import traceback
+            traceback.print_exc()
 
     def on_add_active(ev):
         if not bridge.connected:
@@ -675,7 +727,7 @@ def create_ui_panel(bridge):
         if not bridge.connected:
             ui_log("[ui] Not connected")
             return
-        bridge.add_keyframes_to_context()
+        bridge.add_tool_keyframes_to_context()
 
     def on_add_comp(ev):
         if not bridge.connected:
@@ -745,13 +797,155 @@ def create_ui_panel(bridge):
 
     # Auto-connect if config exists
     conf = cfg.read_config()
-    if conf and cfg.get_api_key(conf):
-        ui_log("[ui] Auto-connecting from config...")
+    key = cfg.get_api_key(conf) if conf else None
+    url = cfg.get_ws_url(conf) if conf else None
+    ui_log(f"[ui] Config: url={url}, key={'yes' if key else 'MISSING'}")
+    if conf and key:
+        ui_log("[ui] Auto-connecting...")
         bridge.connect()
+        # Give WS thread time to connect before showing panel
+        time.sleep(2)
+        if bridge.connected:
+            ui_log("[ui] Connected!")
+        else:
+            ui_log("[ui] WS thread started but not connected yet — check console")
+            # Print thread status for debugging
+            import threading
+            for t in threading.enumerate():
+                ui_log(f"[ui] Thread: {t.name} alive={t.is_alive()} daemon={t.daemon}")
+    else:
+        ui_log("[ui] No config/key — use Connect button")
 
     win.Show()
+    ui_log("[ui] Panel shown, entering RunLoop...")
     disp.RunLoop()
     win.Hide()
+
+
+# ---------------------------------------------------------------------------
+# Headless event loop — keeps fuscript.exe alive using Fusion's UIDispatcher
+# ---------------------------------------------------------------------------
+
+def _run_headless(bridge, fusion_app):
+    """Run the bridge in headless mode using Fusion's UIDispatcher.
+
+    Creates a minimal hidden window and runs disp.RunLoop() to keep the
+    fuscript.exe process alive.  This is the same mechanism the UI Panel
+    uses — disp.RunLoop() is Fusion's own event loop, so it keeps the
+    process alive while remaining responsive (not blocking Fusion's UI).
+
+    When Fusion closes, the dispatcher exits and RunLoop() returns.
+    """
+    ui = fusion_app.UIManager
+    if not ui:
+        print("[Arkestrator] No UIManager available — cannot run headless")
+        return
+
+    # Get UIDispatcher — same approach as create_ui_panel()
+    disp = getattr(ui, "UIDispatcher", None)
+    if not disp:
+        # Try bmd global (available in direct RunScript contexts)
+        try:
+            disp = bmd.UIDispatcher(ui)  # noqa: F821
+        except (NameError, AttributeError):
+            pass
+    if not disp:
+        print("[Arkestrator] No UIDispatcher available — cannot run headless")
+        return
+
+    # Create a minimal hidden window (dispatcher needs at least one window)
+    _win_id = "ArkHeadless"
+    win = disp.AddWindow(
+        {
+            "ID": _win_id,
+            "WindowTitle": "Arkestrator Bridge",
+            "Geometry": [0, 0, 1, 1],
+        },
+        ui.VGroup([
+            ui.Label({"ID": "StatusLabel", "Text": "Bridge running"}),
+        ]),
+    )
+
+    def on_close(ev):
+        bridge.disconnect()
+        disp.ExitLoop()
+
+    win.On[_win_id].Close = on_close
+
+    # -- Command file IPC ---------------------------------------------------
+    # Other fuscript.exe processes (e.g. add_context, disconnect) can't access
+    # this bridge instance directly.  They write a JSON command to a known
+    # temp file, and this timer picks it up and executes it.
+    import tempfile as _tmpmod
+    _cmd_path = os.path.join(_tmpmod.gettempdir(), "arkestrator_fusion_cmd.json")
+
+    def _check_commands(ev=None):
+        """Check for IPC command files and execute them."""
+        if not os.path.isfile(_cmd_path):
+            return
+        try:
+            with open(_cmd_path, "r") as f:
+                raw = f.read()
+            os.remove(_cmd_path)
+            cmd = json.loads(raw)
+            action = cmd.get("action", "")
+
+            if action == "add_selected":
+                count = bridge.add_selected_to_context()
+                print(f"[Arkestrator] Added {count} selected tool(s) to context")
+            elif action == "add_active":
+                bridge.add_active_tool_to_context()
+                print("[Arkestrator] Added active tool to context")
+            elif action == "add_comp":
+                bridge.add_comp_to_context()
+                print("[Arkestrator] Added comp to context")
+            elif action == "add_flow":
+                bridge.add_flow_graph_to_context()
+            elif action == "add_loaders":
+                bridge.add_loaders_to_context()
+            elif action == "add_savers":
+                bridge.add_savers_to_context()
+            elif action == "add_3d":
+                bridge.add_3d_scene_to_context()
+            elif action == "add_modifiers":
+                bridge.add_modifiers_to_context()
+            elif action == "add_settings":
+                bridge.add_tool_settings_to_context()
+            elif action == "add_keyframes":
+                bridge.add_tool_keyframes_to_context()
+            elif action == "disconnect":
+                bridge.disconnect()
+                disp.ExitLoop()
+            else:
+                print(f"[Arkestrator] Unknown IPC command: {action}")
+        except Exception as exc:
+            print(f"[Arkestrator] IPC error: {exc}")
+
+    # Poll for command files in a daemon thread (reliable cross-process IPC).
+    # We know daemon threads work here because the WS thread uses the same pattern.
+    _ipc_stop = threading.Event()
+
+    def _ipc_poll_loop():
+        while not _ipc_stop.is_set():
+            _check_commands()
+            _ipc_stop.wait(0.5)  # 500ms poll interval
+
+    _ipc_thread = threading.Thread(target=_ipc_poll_loop, daemon=True, name="ark-ipc")
+    _ipc_thread.start()
+
+    # Show the window (required for RunLoop to stay active).
+    # The window is 1x1 pixel, effectively invisible.
+    win.Show()
+
+    print("[Arkestrator] Bridge running (headless event loop)")
+
+    # disp.RunLoop() blocks here — keeps fuscript.exe alive.
+    # Returns when Fusion closes or disp.ExitLoop() is called.
+    disp.RunLoop()
+    _ipc_stop.set()
+
+    print("[Arkestrator] Bridge event loop exited")
+    bridge.disconnect()
 
 
 # ---------------------------------------------------------------------------
@@ -762,32 +956,36 @@ def main():
     """Launch the Arkestrator Fusion bridge.
 
     Behaviour depends on environment:
-      ARKESTRATOR_HEADLESS=1  -> connect silently, no UI panel
-      Otherwise               -> open the UI panel (legacy / manual mode)
+      ARKESTRATOR_HEADLESS=1  -> connect + headless event loop (auto-start)
+      Otherwise               -> open the UI panel (manual mode)
+
+    Both modes use Fusion's UIDispatcher.RunLoop() to keep fuscript.exe
+    alive for the entire session.  Daemon threads (WS, context push) survive
+    because the process stays alive.
     """
     fusion_app = get_fusion_app()
     if fusion_app is None:
         print("[Arkestrator] ERROR: Could not find Fusion application.")
-        print("  Make sure this script is run from within Fusion or DaVinci Resolve.")
         return
 
+    headless = os.environ.get("ARKESTRATOR_HEADLESS", "0") == "1"
     bridge = get_or_create_bridge(fusion_app)
 
-    headless = os.environ.get("ARKESTRATOR_HEADLESS", "0") == "1"
-
     if headless:
-        # Auto-start mode: just connect in background, no UI
         if bridge.connected:
             print("[Arkestrator] Already connected (headless)")
             return
+
         conf = cfg.read_config()
-        if conf and cfg.get_api_key(conf):
-            print("[Arkestrator] Auto-connecting (headless)...")
-            bridge.connect()
-        else:
+        if not conf or not cfg.get_api_key(conf):
             print("[Arkestrator] No config/API key found — skipping auto-connect")
+            return
+
+        print("[Arkestrator] Auto-connecting (headless)...")
+        bridge.connect()
+        _run_headless(bridge, fusion_app)
     else:
-        # Manual mode: show the UI panel
+        # Manual mode: show the UI panel (blocking event loop)
         create_ui_panel(bridge)
 
 

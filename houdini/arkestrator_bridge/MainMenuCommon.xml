@@ -3,7 +3,6 @@
   <menuBar>
     <subMenu id="arkestrator_main_menu">
       <label>Arkestrator</label>
-      <insertBefore>help_menu</insertBefore>
       <scriptItem id="h.arkestrator.add_current_selection_to_context">
         <label>Add Current Selection to Arkestrator Context</label>
         <scriptCode><![CDATA[
