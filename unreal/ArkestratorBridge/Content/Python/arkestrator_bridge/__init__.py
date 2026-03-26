@@ -449,8 +449,9 @@ def register():
         import arkestrator_bridge
         arkestrator_bridge.register()
     """
-    # Register context menus
+    # Register context menus and toolbar button
     context_menu.register_menus()
+    context_menu.register_toolbar_button()
 
     # Auto-connect if config exists
     shared = _read_shared_config()

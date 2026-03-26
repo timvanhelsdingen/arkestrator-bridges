@@ -13,6 +13,7 @@ import unreal
 
 _MENU_LABEL = "Add to Arkestrator Context"
 _menus_registered = False
+_toolbar_registered = False
 _next_context_index = 1
 _registered_entries: list[tuple[str, str]] = []
 _MENU_TARGETS = (
@@ -21,6 +22,9 @@ _MENU_TARGETS = (
     ("ContentBrowser.AssetContextMenu", "Add selected assets to Arkestrator context"),
     ("ContentBrowser.FolderContextMenu", "Add selected folders to Arkestrator context"),
     ("LevelEditor.MainMenu.Tools", "Add the current editor selection to Arkestrator context"),
+    # Blueprint/Graph Editor context menus — registered lazily, applied when editor opens
+    ("GraphEditor.GraphContextMenu", "Add selected Blueprint graph elements to Arkestrator context"),
+    ("GraphEditor.GraphNodeContextMenu", "Add selected Blueprint nodes to Arkestrator context"),
 )
 
 
@@ -291,6 +295,119 @@ def _selected_blueprint_items() -> list[dict]:
     return items
 
 
+def _selected_blueprint_graph_nodes() -> list[dict]:
+    """Capture selected nodes in the active Blueprint graph editor."""
+    items: list[dict] = []
+
+    # Try BlueprintEditorLibrary (UE 5.4+) or fall back to subsystem approach
+    bp_editor_lib = getattr(unreal, "BlueprintEditorLibrary", None)
+    if bp_editor_lib is not None:
+        try:
+            selected_nodes = list(bp_editor_lib.get_selected_nodes())
+            for node in selected_nodes:
+                try:
+                    node_name = node.get_name() if hasattr(node, "get_name") else str(node)
+                except Exception:
+                    node_name = str(node)
+                try:
+                    node_class = node.get_class().get_name() if hasattr(node, "get_class") else node.__class__.__name__
+                except Exception:
+                    node_class = "Unknown"
+                try:
+                    node_path = node.get_path_name() if hasattr(node, "get_path_name") else node_name
+                except Exception:
+                    node_path = node_name
+
+                # Try to get node title/comment for richer context
+                title = ""
+                try:
+                    title = node.get_editor_property("node_comment") or ""
+                except Exception:
+                    pass
+
+                items.append({
+                    "type": "node",
+                    "name": node_name,
+                    "path": node_path,
+                    "content": title,
+                    "metadata": {
+                        "class": node_class,
+                        "selection_kind": "blueprint_graph_nodes",
+                    },
+                })
+            return items
+        except Exception:
+            pass
+
+    # Fallback: try to get selected nodes via the active Blueprint editor subsystem
+    try:
+        subsystem = unreal.get_editor_subsystem(unreal.AssetEditorSubsystem)
+        if subsystem is None:
+            return items
+        edited_assets = list(subsystem.get_all_edited_assets())
+    except Exception:
+        return items
+
+    for asset in edited_assets:
+        try:
+            from .blueprint_utils import is_blueprint
+            if not is_blueprint(asset):
+                continue
+        except Exception:
+            continue
+
+        # Try to get the graph and selected nodes through the asset
+        try:
+            graphs = []
+            if hasattr(asset, "ubergraph_pages"):
+                graphs.extend(list(asset.ubergraph_pages))
+            if hasattr(asset, "function_graphs"):
+                graphs.extend(list(asset.function_graphs))
+
+            for graph in graphs:
+                if not hasattr(graph, "nodes"):
+                    continue
+                for node in graph.nodes:
+                    try:
+                        # Check if node has a selected state via metadata
+                        if hasattr(node, "get_editor_property"):
+                            try:
+                                is_selected = node.get_editor_property("node_selection_state")
+                                if not is_selected:
+                                    continue
+                            except Exception:
+                                continue
+                        else:
+                            continue
+                    except Exception:
+                        continue
+
+                    try:
+                        node_name = node.get_name()
+                    except Exception:
+                        node_name = str(node)
+                    try:
+                        node_class = node.get_class().get_name()
+                    except Exception:
+                        node_class = "Unknown"
+
+                    items.append({
+                        "type": "node",
+                        "name": f"{asset.get_name()}:{node_name}",
+                        "path": node.get_path_name() if hasattr(node, "get_path_name") else node_name,
+                        "content": "",
+                        "metadata": {
+                            "class": node_class,
+                            "selection_kind": "blueprint_graph_nodes",
+                            "blueprint": asset.get_name() if hasattr(asset, "get_name") else str(asset),
+                        },
+                    })
+        except Exception:
+            continue
+
+    return items
+
+
 def _on_add_to_context():
     """Callback for the menu item."""
     ws = _get_ws_client()
@@ -303,6 +420,7 @@ def _on_add_to_context():
     folder_items = _selected_folder_items()
     material_node_items = _selected_material_nodes()
     blueprint_items = _selected_blueprint_items()
+    blueprint_graph_items = _selected_blueprint_graph_nodes()
 
     added = 0
     for grouped in (
@@ -351,12 +469,21 @@ def _on_add_to_context():
             selection_kind="blueprints",
             items=blueprint_items,
         ),
+        _push_grouped_item(
+            ws,
+            item_type="node",
+            name=f"Selection ({len(blueprint_graph_items)} BP nodes)",
+            path="selection://unreal/blueprint-graph-nodes",
+            heading="Selected Blueprint graph nodes",
+            selection_kind="blueprint_graph_nodes",
+            items=blueprint_graph_items,
+        ),
     ):
         if grouped is not None:
             added += 1
 
     if added == 0:
-        unreal.log("[ArkestratorBridge] No selected actors/assets/folders/material nodes/blueprints")
+        unreal.log("[ArkestratorBridge] No selected actors/assets/folders/nodes")
     elif added == 1:
         unreal.log("[ArkestratorBridge] Added 1 selection group to Arkestrator context")
     else:
@@ -383,9 +510,6 @@ def register_menus():
         tool_menus = unreal.ToolMenus.get()
         _registered_entries.clear()
         for menu_name, tooltip in _MENU_TARGETS:
-            if not _menu_exists(tool_menus, menu_name):
-                continue
-
             entry_name = f"Arkestrator_{menu_name.replace('.', '_')}_AddContext"
             menu = tool_menus.extend_menu(menu_name)
             if not menu:
@@ -413,9 +537,72 @@ def register_menus():
         print(f"[ArkestratorBridge] Failed to register context menus: {exc}")
 
 
+_TOOLBAR_TARGETS = (
+    # Level Editor (the .User variant is the one that works)
+    "LevelEditor.LevelEditorToolBar.User",
+    # Blueprint Editor (only one — both names point to the same toolbar)
+    "AssetEditor.BlueprintEditor.ToolBar",
+    # Material Editor
+    "AssetEditor.MaterialEditor.ToolBar",
+    # Niagara / Particle Systems
+    "AssetEditor.NiagaraScriptToolkit.ToolBar",
+    "AssetEditor.NiagaraSystemToolkit.ToolBar",
+    # Animation editors
+    "AssetEditor.AnimationEditor.ToolBar",
+    "AssetEditor.SkeletonEditor.ToolBar",
+    "AssetEditor.AnimationBlueprintEditor.ToolBar",
+    # Control Rig
+    "AssetEditor.ControlRigEditor.ToolBar",
+    # Behavior Tree
+    "AssetEditor.BehaviorTreeEditor.ToolBar",
+    # Sound / MetaSound
+    "AssetEditor.MetasoundEditor.ToolBar",
+)
+
+def register_toolbar_button():
+    """Add an 'Arkestrator' button to editor toolbars (level, blueprint, etc.)."""
+    global _toolbar_registered
+    if _toolbar_registered:
+        return
+
+    registered_any = False
+    try:
+        tool_menus = unreal.ToolMenus.get()
+
+        for toolbar_name in _TOOLBAR_TARGETS:
+            try:
+                toolbar = tool_menus.extend_menu(toolbar_name)
+                if not toolbar:
+                    continue
+
+                entry_name = f"Arkestrator_{toolbar_name.replace('.', '_')}_Btn"
+                entry = unreal.ToolMenuEntry(
+                    name=entry_name,
+                    type=unreal.MultiBlockType.TOOL_BAR_BUTTON,
+                    insert_position=unreal.ToolMenuInsert("", unreal.ToolMenuInsertType.DEFAULT),
+                )
+                entry.set_label("Ark +Context")
+                entry.set_tool_tip("Arkestrator — Add current editor selection to AI context")
+                entry.set_string_command(
+                    unreal.ToolMenuStringCommandType.PYTHON,
+                    "",
+                    "from arkestrator_bridge.context_menu import _on_add_to_context; _on_add_to_context()",
+                )
+                toolbar.add_menu_entry("", entry)
+                registered_any = True
+            except Exception:
+                pass
+
+        if registered_any:
+            tool_menus.refresh_all_widgets()
+            _toolbar_registered = True
+    except Exception as exc:
+        print(f"[ArkestratorBridge] Failed to register toolbar buttons: {exc}")
+
+
 def unregister_menus():
     """Clean up state on unregister."""
-    global _menus_registered, _next_context_index
+    global _menus_registered, _toolbar_registered, _next_context_index
     try:
         tool_menus = unreal.ToolMenus.get()
         for menu_name, entry_name in _registered_entries:

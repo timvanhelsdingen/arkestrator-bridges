@@ -3,7 +3,7 @@
 ## Overview
 Python-based UE5 editor plugin that connects to the Arkestrator server via WebSocket. Uses UE5's built-in PythonScriptPlugin for auto-startup and command execution. **No C++ compilation required** - works on Blueprint-only projects.
 
-v2.0 rewrites the original C++ module as a content-only Python plugin.
+Adds "Ark +Context" toolbar buttons in Blueprint, Material, Animation, Niagara, and other asset editors, plus right-click context menus across Level Editor surfaces.
 
 ## Directory Structure
 ```
@@ -11,6 +11,8 @@ bridges/unreal/
 ├── MODULE.md
 └── ArkestratorBridge/
     ├── ArkestratorBridge.uplugin              # Content-only plugin (no C++ modules)
+    ├── Resources/
+    │   └── arkestrator_icon_32.png            # Toolbar icon (not yet used — UE Slate limitation)
     └── Content/Python/
         ├── init_unreal.py                      # Auto-startup script (PythonScriptPlugin)
         └── arkestrator_bridge/
@@ -18,7 +20,7 @@ bridges/unreal/
             ├── ws_client.py                    # Pure-stdlib WebSocket client (threaded I/O)
             ├── file_applier.py                 # File change application with path traversal protection
             ├── command_executor.py             # Python exec + UE console command execution
-            ├── context_menu.py                 # ToolMenus "Add to Arkestrator Context" menu coverage for level/content-browser surfaces
+            ├── context_menu.py                 # ToolMenus context menus + toolbar buttons + BP graph node capture
             └── blueprint_utils.py              # Blueprint introspection (parent class, components, variables, functions, interfaces)
 ```
 
@@ -62,13 +64,24 @@ bridges/unreal/
 - **UE Console** (`ue_console`/`console`): `unreal.SystemLibrary.execute_console_command()`
 
 ### context_menu.py
-- Extends multiple `unreal.ToolMenus` surfaces defensively when available:
+- **Right-click context menus** via `unreal.ToolMenus`:
   - `LevelEditor.ActorContextMenu`
   - `LevelEditor.LevelViewportContextMenu`
   - `ContentBrowser.AssetContextMenu`
   - `ContentBrowser.FolderContextMenu`
   - `LevelEditor.MainMenu.Tools`
-- "Add to Arkestrator Context" pushes current actor, asset, folder, material-node, and Blueprint selections as `bridge_context_item_add`
+  - `GraphEditor.GraphContextMenu`
+  - `GraphEditor.GraphNodeContextMenu`
+- **Toolbar buttons** ("Ark +Context") registered on:
+  - `LevelEditor.LevelEditorToolBar.User`
+  - `AssetEditor.BlueprintEditor.ToolBar`
+  - `AssetEditor.MaterialEditor.ToolBar`
+  - `AssetEditor.NiagaraScriptToolkit.ToolBar` / `AssetEditor.NiagaraSystemToolkit.ToolBar`
+  - `AssetEditor.AnimationEditor.ToolBar` / `AssetEditor.SkeletonEditor.ToolBar` / `AssetEditor.AnimationBlueprintEditor.ToolBar`
+  - `AssetEditor.ControlRigEditor.ToolBar`
+  - `AssetEditor.BehaviorTreeEditor.ToolBar`
+  - `AssetEditor.MetasoundEditor.ToolBar`
+- "Add to Arkestrator Context" captures actors, assets, folders, material nodes, Blueprint assets, and Blueprint graph nodes as `bridge_context_item_add`
 - Module-level `_next_context_index` counter, resets on reconnect
 - Idempotent registration
 
@@ -86,7 +99,7 @@ bridges/unreal/
 ### Sent
 - `bridge_editor_context` - editor context + files (on connect + every 3s)
 - `bridge_context_clear` - clear stale context on connect
-- `bridge_context_item_add` - right-click "Add to Context"
+- `bridge_context_item_add` - right-click "Add to Context" or toolbar button
 - `bridge_command_send` - cross-bridge commands
 - `bridge_command_result` - command execution results
 
@@ -154,7 +167,7 @@ if bridge:
     bridge.add_context_item({"type": "node", "name": "MyActor", ...})
 ```
 
-## Installation (Global - Engine-Level)
+## Installation (Engine-Level)
 1. Copy `ArkestratorBridge/` folder to your UE5 engine's Plugins directory:
    - **Windows:** `C:\Program Files\Epic Games\UE_5.x\Engine\Plugins\ArkestratorBridge\`
    - **macOS:** `/Users/Shared/Epic Games/UE_5.x/Engine/Plugins/ArkestratorBridge/`
@@ -171,9 +184,3 @@ Once installed at the engine level, the plugin is available to **all** projects 
 - **Required:** PythonScriptPlugin (built into UE5 since 4.24)
 - **No C++ compilation** - content-only plugin with empty `Modules` array
 - **No external Python packages** - uses only Python stdlib
-
-## Changes from v1 (C++)
-- Removed all C++ source (`Source/`, `Config/`, `Build.cs`)
-- Removed `UBlueprintFunctionLibrary` API (replaced by Python `get_bridge()` API)
-- No compilation step - works on any UE5 project including Blueprint-only
-- WebSocket implementation changed from UE5 `FWebSocket` to pure Python stdlib
