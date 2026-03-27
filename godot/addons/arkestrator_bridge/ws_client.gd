@@ -416,6 +416,8 @@ func _handle_message(raw: String) -> void:
 				int(payload.get("skipped", 0)),
 				payload.get("errors", []) as Array,
 			)
+		"bridge_file_read_request":
+			_handle_file_read_request(payload)
 		_:
 			pass
 
@@ -436,6 +438,74 @@ func _get_hostname() -> String:
 	if hostname.is_empty():
 		hostname = "unknown"
 	return hostname
+
+
+func _handle_file_read_request(payload: Dictionary) -> void:
+	"""Handle bridge_file_read_request — read local files and send back to server."""
+	var correlation_id := str(payload.get("correlationId", ""))
+	var paths: Array = payload.get("paths", []) as Array
+	if correlation_id.is_empty() or paths.is_empty():
+		return
+
+	var MAX_FILE_SIZE := 10 * 1024 * 1024  # 10MB limit
+
+	var TEXT_EXTS: PackedStringArray = [
+		"txt", "md", "json", "yaml", "yml", "toml", "ini", "cfg",
+		"py", "gd", "cs", "js", "ts", "html", "css", "svg", "xml",
+		"obj", "mtl", "usda", "vex", "log", "csv",
+	]
+
+	var results: Array = []
+	for raw_path in paths:
+		var file_path := str(raw_path)
+		if not FileAccess.file_exists(file_path):
+			results.append({
+				"path": file_path, "content": "", "encoding": "utf8", "size": 0,
+				"error": "File not found",
+			})
+			continue
+
+		var file := FileAccess.open(file_path, FileAccess.READ)
+		if file == null:
+			results.append({
+				"path": file_path, "content": "", "encoding": "utf8", "size": 0,
+				"error": "Cannot open file: %s" % FileAccess.get_open_error(),
+			})
+			continue
+
+		var size := int(file.get_length())
+		if size > MAX_FILE_SIZE:
+			file.close()
+			results.append({
+				"path": file_path, "content": "", "encoding": "utf8", "size": size,
+				"error": "File too large (%d bytes, max %d)" % [size, MAX_FILE_SIZE],
+			})
+			continue
+
+		var raw_bytes := file.get_buffer(size)
+		file.close()
+
+		# Detect text vs binary by extension
+		var ext := file_path.get_extension().to_lower()
+		if ext in TEXT_EXTS:
+			var text_content := raw_bytes.get_string_from_utf8()
+			if not text_content.is_empty() or size == 0:
+				results.append({
+					"path": file_path, "content": text_content, "encoding": "utf8", "size": size,
+				})
+				continue
+
+		# Binary — base64 encode
+		var b64_content := Marshalls.raw_to_base64(raw_bytes)
+		results.append({
+			"path": file_path, "content": b64_content, "encoding": "base64", "size": size,
+		})
+
+	send_message({
+		"type": "bridge_file_read_response",
+		"id": _new_uuid(),
+		"payload": {"correlationId": correlation_id, "files": results},
+	})
 
 
 func _new_uuid() -> String:

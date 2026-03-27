@@ -487,6 +487,9 @@ namespace ArkestratorBridge
                 case "bridge_command_result":
                     HandleBridgeCommandResult(payload);
                     break;
+                case "bridge_file_read_request":
+                    HandleFileReadRequest(message);
+                    break;
                 case "error":
                 {
                     var code = GetString(payload, "code");
@@ -573,6 +576,108 @@ namespace ArkestratorBridge
             var executed = GetInt(payload, "executed");
             var failed = GetInt(payload, "failed");
             Debug.Log($"[ArkestratorBridge] bridge_command_result from {program}: success={success} executed={executed} failed={failed}");
+        }
+
+        private static void HandleFileReadRequest(Dictionary<string, object?> message)
+        {
+            if (!message.TryGetValue("payload", out var payloadObj) || payloadObj is not Dictionary<string, object?> payload)
+            {
+                return;
+            }
+
+            var correlationId = GetString(payload, "correlationId");
+            var paths = GetList(payload, "paths");
+            if (string.IsNullOrEmpty(correlationId) || paths.Count == 0)
+            {
+                return;
+            }
+
+            const long MaxFileSize = 10L * 1024 * 1024; // 10MB limit
+
+            var textExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ".txt", ".md", ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg",
+                ".py", ".gd", ".cs", ".js", ".ts", ".html", ".css", ".svg", ".xml",
+                ".obj", ".mtl", ".usda", ".vex", ".log", ".csv",
+            };
+
+            var results = new List<object?>();
+            foreach (var rawPath in paths)
+            {
+                var filePath = rawPath?.ToString() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(filePath))
+                {
+                    continue;
+                }
+
+                // Resolve relative paths against project root
+                var fullPath = Path.IsPathRooted(filePath) ? filePath : Path.GetFullPath(Path.Combine(GetProjectRoot(), filePath));
+
+                try
+                {
+                    if (!File.Exists(fullPath))
+                    {
+                        results.Add(new Dictionary<string, object?>
+                        {
+                            ["path"] = filePath, ["content"] = "", ["encoding"] = "utf8", ["size"] = 0,
+                            ["error"] = "File not found",
+                        });
+                        continue;
+                    }
+
+                    var info = new FileInfo(fullPath);
+                    if (info.Length > MaxFileSize)
+                    {
+                        results.Add(new Dictionary<string, object?>
+                        {
+                            ["path"] = filePath, ["content"] = "", ["encoding"] = "utf8", ["size"] = info.Length,
+                            ["error"] = $"File too large ({info.Length} bytes, max {MaxFileSize})",
+                        });
+                        continue;
+                    }
+
+                    var rawBytes = File.ReadAllBytes(fullPath);
+                    var ext = Path.GetExtension(filePath);
+
+                    if (textExts.Contains(ext))
+                    {
+                        try
+                        {
+                            var textContent = Encoding.UTF8.GetString(rawBytes);
+                            results.Add(new Dictionary<string, object?>
+                            {
+                                ["path"] = filePath, ["content"] = textContent, ["encoding"] = "utf8", ["size"] = rawBytes.Length,
+                            });
+                            continue;
+                        }
+                        catch
+                        {
+                            // Fall through to base64
+                        }
+                    }
+
+                    // Binary — base64 encode
+                    var b64 = Convert.ToBase64String(rawBytes);
+                    results.Add(new Dictionary<string, object?>
+                    {
+                        ["path"] = filePath, ["content"] = b64, ["encoding"] = "base64", ["size"] = rawBytes.Length,
+                    });
+                }
+                catch (Exception ex)
+                {
+                    results.Add(new Dictionary<string, object?>
+                    {
+                        ["path"] = filePath, ["content"] = "", ["encoding"] = "utf8", ["size"] = 0,
+                        ["error"] = ex.Message,
+                    });
+                }
+            }
+
+            SendEnvelope("bridge_file_read_response", new Dictionary<string, object?>
+            {
+                ["correlationId"] = correlationId,
+                ["files"] = results,
+            });
         }
 
         private static void SendEnvelope(string type, Dictionary<string, object?> payload)

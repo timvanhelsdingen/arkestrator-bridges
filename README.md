@@ -14,6 +14,14 @@ Bridge plugins for connecting DCC applications to [Arkestrator](https://github.c
 | Unreal | UE5 | Engine-level | Python plugin — context capture, file apply, command execution |
 | Fusion | Blackmagic Fusion / DaVinci Resolve | User-level | Python script — context capture, file apply, Python/Lua execution |
 
+## Features
+
+All bridges support:
+- **Context Capture** — Editor state, open files, selected nodes pushed to server
+- **Command Execution** — Run scripts (Python/GDScript/C#) from server-side agents
+- **File Delivery** — Apply file changes from completed jobs
+- **Client File Access** — Server-side agents can read any file on the client machine via `read_client_file` MCP tool (images, renders, project files — no file syncing needed)
+
 ## Installation
 
 Bridges are installed through the Arkestrator desktop client:

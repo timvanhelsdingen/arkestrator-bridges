@@ -126,6 +126,10 @@ def _on_ws_message(msg: dict):
         _tag_redraw()
         return
 
+    if msg_type == "bridge_file_read_request":
+        _handle_file_read_request(msg)
+        return
+
     if msg_type == "job_complete":
         scene = _get_active_scene()
         props = scene.agent_manager if (scene and hasattr(scene, "agent_manager")) else None
@@ -267,6 +271,66 @@ def _handle_bridge_command_result(payload: dict):
     print(f"[ArkestratorBridge] bridge-cmd-result: {status} from {program} ({bridge_id[:8]}): {executed} executed, {failed} failed, {skipped} skipped")
     for err in errors:
         print(f"[ArkestratorBridge] bridge-cmd-error: {err}")
+
+
+# ---------------------------------------------------------------------------
+# File read (server-side agent reads files on client via bridge)
+# ---------------------------------------------------------------------------
+
+def _handle_file_read_request(msg: dict):
+    """Handle bridge_file_read_request — read local files and send back to server."""
+    import base64
+    import os
+    import uuid
+
+    payload = msg.get("payload", {})
+    correlation_id = str(payload.get("correlationId", ""))
+    paths = payload.get("paths", [])
+    if not correlation_id or not paths:
+        return
+
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
+
+    results = []
+    for file_path in paths:
+        try:
+            file_path = str(file_path)
+            size = os.path.getsize(file_path)
+            if size > MAX_FILE_SIZE:
+                results.append({"path": file_path, "content": "", "encoding": "utf8", "size": size,
+                                "error": f"File too large ({size} bytes, max {MAX_FILE_SIZE})"})
+                continue
+
+            with open(file_path, "rb") as f:
+                raw = f.read()
+
+            # Detect text vs binary
+            text_exts = {".txt", ".md", ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg",
+                         ".py", ".gd", ".cs", ".js", ".ts", ".html", ".css", ".svg", ".xml",
+                         ".obj", ".mtl", ".usda", ".vex", ".log", ".csv", ".blend1"}
+            ext = os.path.splitext(file_path)[1].lower()
+            if ext in text_exts:
+                try:
+                    content = raw.decode("utf-8")
+                    results.append({"path": file_path, "content": content, "encoding": "utf8", "size": len(raw)})
+                    continue
+                except UnicodeDecodeError:
+                    pass
+
+            # Binary (images, blend files, etc.)
+            content = base64.b64encode(raw).decode("ascii")
+            results.append({"path": file_path, "content": content, "encoding": "base64", "size": len(raw)})
+
+        except Exception as e:
+            results.append({"path": file_path, "content": "", "encoding": "utf8", "size": 0,
+                            "error": str(e)})
+
+    if _ws_client:
+        _ws_client.send_message({
+            "type": "bridge_file_read_response",
+            "id": str(uuid.uuid4()),
+            "payload": {"correlationId": correlation_id, "files": results},
+        })
 
 
 # ---------------------------------------------------------------------------
