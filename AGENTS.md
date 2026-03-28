@@ -6,16 +6,26 @@ Bridge plugins that connect DCC applications (Godot, Blender, Houdini, Nuke, Com
 ## Repository Structure
 ```
 <bridge>/
-  arkestrator_bridge/     # Python/GDScript package (the actual plugin)
-    __init__.py           # Main module: WS dispatch, context, menus, public API
-    ws_client.py          # WebSocket client (stdlib only, program=<bridge>)
-    command_executor.py   # Language-specific command execution
-    file_applier.py       # File create/modify/delete with path safety
-  skills/                 # Skill markdown files (compositing, scripting, etc.)
-  coordinator.md          # Agent coordinator script with execution rules
-  MODULE.md               # Current state documentation for this bridge
-registry.json             # Central registry of all bridges, skills, and coordinator scripts
+  <plugin_dir>/             # Plugin code — varies by bridge (see below)
+    __init__.py / plugin.gd / *.cs   # Main module
+    ws_client.*             # WebSocket client
+    command_executor.*      # Language-specific command execution
+    file_applier.*          # File create/modify/delete with path safety
+  skills/                   # Skill markdown files (domain knowledge for AI agents)
+    verification.md         # Verification & quality assessment (all bridges)
+    ...                     # DCC-specific skills
+  coordinator.md            # Simplified coordinator reference (full version in registry.json)
+  MODULE.md                 # Current state documentation for this bridge
+registry.json               # Central registry: bridge metadata, skills, full coordinator scripts
+scripts/                    # Repo-level tooling (bump-version.mjs)
 ```
+
+### Plugin Directory Variants
+- **Python bridges** (Blender, Houdini, ComfyUI, Nuke): `arkestrator_bridge/` with `.py` files
+- **Godot**: `addons/arkestrator_bridge/` with `.gd` (GDScript) files + `plugin.cfg`
+- **Unity**: `ArkestratorBridge/Editor/` with `.cs` files + `.asmdef`
+- **Unreal**: `ArkestratorBridge/Content/Python/arkestrator_bridge/` with `.py` files + `.uplugin`
+- **Fusion**: `Arkestrator/` with `.py` files + `Arkestrator.fu` (Fusion script loader) + `Scripts/Tool/` for context menu
 
 ## Documentation Requirements
 
@@ -33,11 +43,25 @@ These docs are how other agents (and future sessions) understand what each bridg
 
 - All bridges follow the same thin-bridge pattern: connect, push context, execute commands, apply files. No job submission UI — that lives in the Tauri client.
 - `ws_client.py` is identical across Python bridges except for `program=` in `_build_url`. Copy from an existing bridge when creating a new one.
-- `file_applier.py` is standardized. Only the project root detection differs per DCC app.
-- `command_executor.py` is DCC-specific. Each bridge supports different languages (Python, GDScript, HScript, TCL, Lua, etc.).
+- `file_applier.py` / `file_applier.gd` / `ArkestratorFileApplier.cs` is standardized. Only the project root detection differs per DCC app.
+- `command_executor.*` is DCC-specific. Each bridge supports different languages (Python, GDScript, HScript, TCL, Lua, unity_json, ue_console, etc.).
 - Bridges auto-discover connection config from `~/.arkestrator/config.json` (written by the Tauri desktop client).
 - Context items use `bridge_context_item_add` with incrementing `@N` index references.
 - All commands that touch the DCC node graph must execute on the main thread (each DCC has its own mechanism for this).
+- Full coordinator scripts live in `registry.json` (not in the `coordinator.md` files, which are simplified references). The registry versions include template variables (`{BRIDGE_LIST}`, `{BRIDGE_CONTEXT}`) filled by the server at runtime.
+
+## Bridge Inventory
+
+| Bridge | Language | Install Type | Stability |
+|--------|----------|-------------|-----------|
+| godot | GDScript | Per-project (`addons/`) | Stable |
+| blender | Python | User-level addon | Stable |
+| houdini | Python | User-level package | Stable |
+| comfyui | Python | Standalone process | Stable |
+| nuke | Python | User-level (`~/.nuke/`) | Experimental |
+| unity | C# | Per-project (`Assets/`) | Experimental |
+| unreal | Python + C++ | Engine plugin | Experimental |
+| fusion | Python + Lua | User-level config | Experimental |
 
 ## Bridge Development Checklist
 
@@ -50,7 +74,7 @@ When creating or modifying a bridge:
 - [ ] Context menu integration ("Add to Arkestrator Context")
 - [ ] Public API (`get_bridge()`) works for third-party plugins
 - [ ] `MODULE.md` updated with current state
-- [ ] `registry.json` entry added/updated
+- [ ] `registry.json` entry added/updated (skills, coordinator script, install paths, detect paths)
 - [ ] Skills and coordinator script created/updated
 - [ ] `README.md` bridge table updated if new bridge
 
