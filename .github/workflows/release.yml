@@ -18,53 +18,52 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Package bridge plugins
+      - name: Package bridge plugins from registry
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          mkdir -p dist
+          DIST="$GITHUB_WORKSPACE/dist"
+          mkdir -p "$DIST"
 
-          # Godot
-          cd godot/addons
-          zip -r "../../dist/arkestrator-bridge-godot-v${VERSION}.zip" arkestrator_bridge/
-          cd ../..
+          # Data-driven packaging: reads each bridge's "ci" spec from registry.json.
+          # To add a new bridge to releases, just add it to registry.json with:
+          #   "ci": { "dir": "<local-dir>", "include": ["<path>/"], "exclude": ["*.pyc"] }
 
-          # Blender
-          cd blender
-          zip -r "../dist/arkestrator-bridge-blender-v${VERSION}.zip" arkestrator_bridge/
-          cd ..
+          jq -c '.bridges[]' registry.json | while IFS= read -r bridge; do
+            ID=$(echo "$bridge" | jq -r '.id')
+            DIR=$(echo "$bridge" | jq -r '.ci.dir // empty')
+            ASSET=$(echo "$bridge" | jq -r '.asset // empty')
 
-          # Houdini
-          cd houdini
-          zip -r "../dist/arkestrator-bridge-houdini-v${VERSION}.zip" arkestrator_bridge/ arkestrator_bridge.json
-          cd ..
+            if [ -z "$DIR" ] || [ -z "$ASSET" ]; then
+              echo "⚠  Skipping $ID — no ci.dir or asset in registry.json"
+              continue
+            fi
 
-          # ComfyUI
-          cd comfyui
-          zip -r "../dist/arkestrator-bridge-comfyui-v${VERSION}.zip" arkestrator_bridge/
-          cd ..
+            BRIDGE_DIR="$GITHUB_WORKSPACE/$DIR"
+            if [ ! -d "$BRIDGE_DIR" ]; then
+              echo "⚠  Skipping $ID — directory $DIR not found"
+              continue
+            fi
 
-          # Unity
-          cd unity
-          zip -r "../dist/arkestrator-bridge-unity-v${VERSION}.zip" ArkestratorBridge/
-          cd ..
+            ZIPNAME=$(echo "$ASSET" | sed "s/{version}/$VERSION/g")
 
-          # Unreal
-          cd unreal
-          zip -r "../dist/arkestrator-bridge-unreal-v${VERSION}.zip" ArkestratorBridge/
-          cd ..
+            # Build include list
+            INCLUDES=$(echo "$bridge" | jq -r '.ci.include[]? // empty')
 
-          # Fusion
-          cd blackmagic-fusion
-          zip -r "../dist/arkestrator-bridge-fusion-v${VERSION}.zip" . -x "coordinator.md" -x "install.py" -x "__pycache__/*" -x "*.pyc"
-          cd ..
+            # Build exclude args
+            EXCLUDE_ARGS=""
+            for exc in $(echo "$bridge" | jq -r '.ci.exclude[]? // empty'); do
+              EXCLUDE_ARGS="$EXCLUDE_ARGS -x \"$exc\""
+            done
 
-          # Nuke
-          cd nuke
-          zip -r "../dist/arkestrator-bridge-nuke-v${VERSION}.zip" arkestrator_bridge/
-          cd ..
+            cd "$BRIDGE_DIR"
+            eval zip -r "$DIST/$ZIPNAME" $INCLUDES $EXCLUDE_ARGS
+            echo "✓  $ID → $ZIPNAME"
+            cd "$GITHUB_WORKSPACE"
+          done
 
+          echo ""
           echo "Packaged bridge plugins:"
-          ls -la dist/
+          ls -lh "$DIST/"
 
       - name: Create release
         uses: softprops/action-gh-release@v2
