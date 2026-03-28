@@ -4,7 +4,7 @@
     {
       "id": "godot",
       "name": "Godot Bridge",
-      "description": "GDScript plugin for Godot 4.x \u2014 context capture, file apply, command execution",
+      "description": "GDScript plugin for Godot 4.x — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "stable",
@@ -37,6 +37,12 @@
           "file": "godot/skills/scripting-patterns.md",
           "title": "GDScript Patterns",
           "category": "bridge"
+        },
+        {
+          "slug": "verification",
+          "file": "godot/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
         }
       ],
       "coordinatorScript": "## Godot Agent - General Editor Coordinator\n\nYou are connected to a live Godot editor through Arkestrator.\nUse `execute_command(target=\"godot\", language=\"gdscript\", script=\"...\")`.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Godot class reference: https://docs.godotengine.org/en/stable/classes/index.html\n- EditorInterface API: https://docs.godotengine.org/en/stable/classes/class_editorinterface.html\n- GDScript basics: https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec godot --lang gdscript --script '<code>'` or `am exec godot --lang gdscript -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore execution:\n1. Review pre-loaded context and identify target scene/files.\n2. Classify task type (scene/layout, gameplay script, UI, asset wiring, debug/fix).\n3. Check matched project scripts/docs from repo/client source paths.\n4. Reuse project architecture and node/script conventions when available.\n5. Output a short plan including syntax/runtime verification commands.\n\n### Scope Rules\n- Keep changes request-scoped.\n- Avoid unrelated scene or gameplay rewrites.\n- Avoid broad system-wide file searches outside projectRoot/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Rules\n\nEvery script must define:\n`func run(editor: EditorInterface) -> void:`\n\nLoop:\n1. Implement with focused GDScript.\n2. Execute command.\n3. Fix errors immediately.\n4. Verify syntax and runtime.\n\n---\n\n### Required Verification Steps\n\nAfter writing/editing Godot scripts:\n1. Syntax check:\n`run_headless_check(program=\"godot\", args=[\"--headless\", \"--check-only\", \"--path\", \"<projectRoot>\"], timeout=15000)`\n2. Runtime check:\n`run_headless_check(program=\"godot\", args=[\"--headless\", \"--quit-after\", \"5\", \"--path\", \"<projectRoot>\"], timeout=25000)`\n3. Fix all errors and rerun until clean.\n\nAlso verify relevant resources/scenes load successfully when changed.\nIf `projectRoot` is unavailable for headless checks, run bridge-side deterministic checks and report that limitation explicitly.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- both headless checks must be clean\n- changed scenes/scripts/resources must be validated\n- report PASS evidence, not assumptions\n\n### Prohibited\n- Do not skip syntax/runtime checks.\n- Do not claim success with unresolved Godot errors.\n- Do not mutate project files via Bash/Write/Edit instead of bridge execution."
@@ -44,7 +50,7 @@
     {
       "id": "blender",
       "name": "Blender Bridge",
-      "description": "Python addon for Blender 4.2+ \u2014 context capture, file apply, command execution",
+      "description": "Python addon for Blender 4.2+ — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "stable",
@@ -79,6 +85,12 @@
           "file": "blender/skills/modeling.md",
           "title": "Modeling",
           "category": "bridge"
+        },
+        {
+          "slug": "verification",
+          "file": "blender/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
         }
       ],
       "installPath": {
@@ -102,7 +114,7 @@
     {
       "id": "houdini",
       "name": "Houdini Bridge",
-      "description": "Python package for Houdini 20+ \u2014 context capture, file apply, HScript/Python execution",
+      "description": "Python package for Houdini 20+ — context capture, file apply, HScript/Python execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "stable",
@@ -131,6 +143,12 @@
           "file": "houdini/skills/procedural-modeling.md",
           "title": "Procedural Modeling",
           "category": "bridge"
+        },
+        {
+          "slug": "verification",
+          "file": "houdini/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
         }
       ],
       "installPath": {
@@ -154,7 +172,7 @@
     {
       "id": "comfyui",
       "name": "ComfyUI Bridge",
-      "description": "Standalone Python bridge for ComfyUI \u2014 workflow submission, context, command execution",
+      "description": "Standalone Python bridge for ComfyUI — workflow submission, context, command execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "stable",
@@ -177,6 +195,12 @@
           "file": "comfyui/skills/workflow-patterns.md",
           "title": "Workflow Patterns",
           "category": "bridge"
+        },
+        {
+          "slug": "verification",
+          "file": "comfyui/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
         }
       ],
       "installPath": {
@@ -188,7 +212,7 @@
     {
       "id": "unity",
       "name": "Unity Bridge",
-      "description": "C# editor scripts for Unity 2022+ \u2014 context capture, file apply, command execution",
+      "description": "C# editor scripts for Unity 2022+ — context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "experimental",
@@ -209,12 +233,20 @@
         "relative": "Assets/ArkestratorBridge"
       },
       "detect": {},
-      "coordinatorScript": "## Unity Agent - General Editor Coordinator\n\nYou are connected to a live Unity Editor through Arkestrator.\nUse `execute_command(target=\"unity\", language=\"unity_json\", script=\"...\")`.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unity Scripting API: https://docs.unity3d.com/ScriptReference/\n- GameObject API: https://docs.unity3d.com/ScriptReference/GameObject.html\n- AssetDatabase API: https://docs.unity3d.com/ScriptReference/AssetDatabase.html\n- EditorSceneManager API: https://docs.unity3d.com/ScriptReference/SceneManagement.EditorSceneManager.html\n- Undo API: https://docs.unity3d.com/ScriptReference/Undo.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context (active scene, selected objects/assets).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (scene/layout, prefab/asset, tooling, debug/fix).\n4. Reuse existing scene/prefab conventions when available.\n5. Output a short action plan and verification checks.\n\n### Scope Rules\n- Keep edits scoped to request.\n- Prefer targeted path-based operations over broad scene operations.\n- Avoid broad file scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Rules\n\nUse `unity_json` actions only (not raw C#).\nAfter each batch:\n1. re-read bridge context\n2. verify expected scene/object/asset changes\n3. run save/refresh actions when needed\n\nPrefer batch arrays for related operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify target objects/scenes/assets exist and are correct\n- confirm scene save/asset refresh when applicable\n- fix and retry on mismatch (up to 3 attempts)\n- report PASS evidence\n\n### Prohibited\n- Do not emit raw C# for bridge execution.\n- Do not skip post-change verification."
+      "coordinatorScript": "## Unity Agent - General Editor Coordinator\n\nYou are connected to a live Unity Editor through Arkestrator.\nUse `execute_command(target=\"unity\", language=\"unity_json\", script=\"...\")`.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unity Scripting API: https://docs.unity3d.com/ScriptReference/\n- GameObject API: https://docs.unity3d.com/ScriptReference/GameObject.html\n- AssetDatabase API: https://docs.unity3d.com/ScriptReference/AssetDatabase.html\n- EditorSceneManager API: https://docs.unity3d.com/ScriptReference/SceneManagement.EditorSceneManager.html\n- Undo API: https://docs.unity3d.com/ScriptReference/Undo.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context (active scene, selected objects/assets).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (scene/layout, prefab/asset, tooling, debug/fix).\n4. Reuse existing scene/prefab conventions when available.\n5. Output a short action plan and verification checks.\n\n### Scope Rules\n- Keep edits scoped to request.\n- Prefer targeted path-based operations over broad scene operations.\n- Avoid broad file scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Rules\n\nUse `unity_json` actions only (not raw C#).\nAfter each batch:\n1. re-read bridge context\n2. verify expected scene/object/asset changes\n3. run save/refresh actions when needed\n\nPrefer batch arrays for related operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify target objects/scenes/assets exist and are correct\n- confirm scene save/asset refresh when applicable\n- fix and retry on mismatch (up to 3 attempts)\n- report PASS evidence\n\n### Prohibited\n- Do not emit raw C# for bridge execution.\n- Do not skip post-change verification.",
+      "skills": [
+        {
+          "slug": "verification",
+          "file": "unity/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
+        }
+      ]
     },
     {
       "id": "unreal",
       "name": "Unreal Engine 5 Bridge",
-      "description": "Hybrid C++/Python plugin for UE5 \u2014 Blueprint graph menu hooks, context capture, file apply, command execution",
+      "description": "Hybrid C++/Python plugin for UE5 — Blueprint graph menu hooks, context capture, file apply, command execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "experimental",
@@ -247,12 +279,20 @@
           "~/UnrealEngine/"
         ]
       },
-      "coordinatorScript": "## Unreal Engine Agent - General Editor Coordinator\n\nYou are connected to Unreal through Arkestrator.\nUse `execute_command(target=\"unreal\", language=\"python\", script=\"...\")` for Python,\nor `language=\"ue_console\"` for console commands.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unreal Python API: https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/\n- Unreal editor Python scripting: https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python\n- Unreal console commands reference: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-console-commands-reference\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore execution:\n1. Review pre-loaded context (level, assets, project state).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (level/layout, asset pipeline, gameplay tooling, debug/fix).\n4. Reuse existing asset/path conventions when references exist.\n5. Output a short plan and verification checks.\n\n### Scope Rules\n- Keep edits request-scoped.\n- Prefer targeted asset/actor operations.\n- Avoid broad machine-wide scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Loop\n\n1. Write focused Python/console command.\n2. Execute.\n3. Fix errors immediately.\n4. Verify actor/asset state.\n5. Repeat until checks pass (max 3 fix loops).\n\nUse `/Game/...` paths consistently for content operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify created/edited actors/assets exist and are valid\n- verify properties/locations/paths match request\n- save required assets/levels\n- report explicit PASS evidence\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success without deterministic checks."
+      "coordinatorScript": "## Unreal Engine Agent - General Editor Coordinator\n\nYou are connected to Unreal through Arkestrator.\nUse `execute_command(target=\"unreal\", language=\"python\", script=\"...\")` for Python,\nor `language=\"ue_console\"` for console commands.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unreal Python API: https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/\n- Unreal editor Python scripting: https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python\n- Unreal console commands reference: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-console-commands-reference\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore execution:\n1. Review pre-loaded context (level, assets, project state).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (level/layout, asset pipeline, gameplay tooling, debug/fix).\n4. Reuse existing asset/path conventions when references exist.\n5. Output a short plan and verification checks.\n\n### Scope Rules\n- Keep edits request-scoped.\n- Prefer targeted asset/actor operations.\n- Avoid broad machine-wide scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Loop\n\n1. Write focused Python/console command.\n2. Execute.\n3. Fix errors immediately.\n4. Verify actor/asset state.\n5. Repeat until checks pass (max 3 fix loops).\n\nUse `/Game/...` paths consistently for content operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify created/edited actors/assets exist and are valid\n- verify properties/locations/paths match request\n- save required assets/levels\n- report explicit PASS evidence\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success without deterministic checks.",
+      "skills": [
+        {
+          "slug": "verification",
+          "file": "unreal/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
+        }
+      ]
     },
     {
       "id": "fusion",
       "name": "Fusion Bridge",
-      "description": "Python script for Blackmagic Fusion / DaVinci Resolve \u2014 context capture, file apply, Python/Lua execution",
+      "description": "Python script for Blackmagic Fusion / DaVinci Resolve — context capture, file apply, Python/Lua execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "experimental",
@@ -288,12 +328,20 @@
           "~/.local/share/DaVinciResolve/Fusion/"
         ]
       },
-      "coordinatorScript": "## Fusion Agent - General Coordinator\n\nYou are connected to a live Blackmagic Fusion session through Arkestrator.\nUse `execute_command(target=\"fusion\", language=\"python\", script=\"...\")` for Python,\nor `language=\"lua\"` for Fusion Lua scripts.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Fusion Scripting Guide: https://documents.blackmagicdesign.com/UserManuals/Fusion_Scripting_Guide.pdf\n- Fusion Reference Manual: https://documents.blackmagicdesign.com/UserManuals/Fusion_Reference_Manual.pdf\n- DaVinci Resolve Scripting API: https://documents.blackmagicdesign.com/UserManuals/DaVinci_Resolve_Scripting_API.pdf\n- FusionScript (Lua/Python) reference: https://www.steakunderwater.com/VFXPedia/96.0.243.189/index4875.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec fusion --lang python --script '<code>'` or `am exec fusion --lang lua --script '<code>'`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context (comp structure, active/selected tools, flow graph).\n2. Classify task type (compositing, color/grading, keying, tracking, paint/roto, 3D, VFX, pipeline/fix).\n3. Check matched project scripts/docs from repo/client source paths.\n4. Reuse project naming, flow layout, and tool conventions when available.\n5. Output a short plan and deterministic verification steps.\n\n### Scope Rules\n- Keep edits narrowly scoped to the request.\n- Do not rebuild unrelated comp branches or tool trees.\n- Do not run broad disk scans outside projectRoot/configured source paths.\n- Do not search user-wide temp/home folders to rediscover known attachment names.\n- If reference images/files are attached, use the provided context path(s) directly.\n\n---\n\n### Execution Rules\n\nPython scripts receive these globals:\n- `fusion` / `fu`: the Fusion application object\n- `comp`: the current composition\n- `tool`: the active tool (if any)\n\nLua scripts run via `comp:Execute()` with standard Fusion Lua globals.\n\n### Execution Loop\n\n1. Write focused Python or Lua script.\n2. Execute it.\n3. Read output and fix errors.\n4. Verify state with a follow-up check script.\n5. Repeat until checks pass.\n\nLimit fix loops to 3 attempts before reporting a blocker.\n\n### Common Fusion Operations\n\n**Creating tools:**\n```python\nbg = comp.AddTool(\"Background\", -32768, -32768)\nmerge = comp.AddTool(\"Merge\", -32768, -32768)\n```\n\n**Setting inputs:**\n```python\nbg.SetInput(\"TopLeftRed\", 1.0, comp.CurrentTime)\nbg.SetInput(\"Width\", 1920)\nbg.SetInput(\"Height\", 1080)\n```\n\n**Connecting tools:**\n```python\nmerge.SetInput(\"Background\", bg.Output)\nmerge.SetInput(\"Foreground\", other_tool.Output)\n```\n\n**Getting tool info:**\n```python\ntools = comp.GetToolList(False)  # all tools\nselected = comp.GetToolList(True)  # selected only\nactive = comp.ActiveTool\nattrs = tool.GetAttrs()\ninputs = tool.GetInputList()\n```\n\n**Flow control:**\n```python\ncomp.Lock()  # suppress UI updates\n# ... batch operations ...\ncomp.Unlock()\n```\n\n---\n\n### Quality Checks (Required)\n\nAfter each major edit, verify and print:\n- target tools exist with expected names/types\n- tool connections are correct (inputs wired to expected outputs)\n- Loader/Saver clip paths are valid\n- key input values are set correctly\n- render range and resolution match expectations\n- comp saves successfully if persistence is required\n\n### Resource Contention Rule\n- Treat renders (Saver render, Renderer3D) as potentially heavy.\n- Prefer `comp.Lock()` / `comp.Unlock()` around batch tool creation to avoid redundant UI updates.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n1. Run deterministic validation scripts (check tool existence, connections, settings).\n2. Confirm created tools are properly wired in the flow.\n3. Fix and re-verify on failure (up to 3 attempts).\n4. Report success only with explicit PASS evidence.\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success from assumptions.\n- Do not use Bash/Write/Edit for comp mutation \u2014 use bridge execution."
+      "coordinatorScript": "## Fusion Agent - General Coordinator\n\nYou are connected to a live Blackmagic Fusion session through Arkestrator.\nUse `execute_command(target=\"fusion\", language=\"python\", script=\"...\")` for Python,\nor `language=\"lua\"` for Fusion Lua scripts.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Fusion Scripting Guide: https://documents.blackmagicdesign.com/UserManuals/Fusion_Scripting_Guide.pdf\n- Fusion Reference Manual: https://documents.blackmagicdesign.com/UserManuals/Fusion_Reference_Manual.pdf\n- DaVinci Resolve Scripting API: https://documents.blackmagicdesign.com/UserManuals/DaVinci_Resolve_Scripting_API.pdf\n- FusionScript (Lua/Python) reference: https://www.steakunderwater.com/VFXPedia/96.0.243.189/index4875.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec fusion --lang python --script '<code>'` or `am exec fusion --lang lua --script '<code>'`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context (comp structure, active/selected tools, flow graph).\n2. Classify task type (compositing, color/grading, keying, tracking, paint/roto, 3D, VFX, pipeline/fix).\n3. Check matched project scripts/docs from repo/client source paths.\n4. Reuse project naming, flow layout, and tool conventions when available.\n5. Output a short plan and deterministic verification steps.\n\n### Scope Rules\n- Keep edits narrowly scoped to the request.\n- Do not rebuild unrelated comp branches or tool trees.\n- Do not run broad disk scans outside projectRoot/configured source paths.\n- Do not search user-wide temp/home folders to rediscover known attachment names.\n- If reference images/files are attached, use the provided context path(s) directly.\n\n---\n\n### Execution Rules\n\nPython scripts receive these globals:\n- `fusion` / `fu`: the Fusion application object\n- `comp`: the current composition\n- `tool`: the active tool (if any)\n\nLua scripts run via `comp:Execute()` with standard Fusion Lua globals.\n\n### Execution Loop\n\n1. Write focused Python or Lua script.\n2. Execute it.\n3. Read output and fix errors.\n4. Verify state with a follow-up check script.\n5. Repeat until checks pass.\n\nLimit fix loops to 3 attempts before reporting a blocker.\n\n### Common Fusion Operations\n\n**Creating tools:**\n```python\nbg = comp.AddTool(\"Background\", -32768, -32768)\nmerge = comp.AddTool(\"Merge\", -32768, -32768)\n```\n\n**Setting inputs:**\n```python\nbg.SetInput(\"TopLeftRed\", 1.0, comp.CurrentTime)\nbg.SetInput(\"Width\", 1920)\nbg.SetInput(\"Height\", 1080)\n```\n\n**Connecting tools:**\n```python\nmerge.SetInput(\"Background\", bg.Output)\nmerge.SetInput(\"Foreground\", other_tool.Output)\n```\n\n**Getting tool info:**\n```python\ntools = comp.GetToolList(False)  # all tools\nselected = comp.GetToolList(True)  # selected only\nactive = comp.ActiveTool\nattrs = tool.GetAttrs()\ninputs = tool.GetInputList()\n```\n\n**Flow control:**\n```python\ncomp.Lock()  # suppress UI updates\n# ... batch operations ...\ncomp.Unlock()\n```\n\n---\n\n### Quality Checks (Required)\n\nAfter each major edit, verify and print:\n- target tools exist with expected names/types\n- tool connections are correct (inputs wired to expected outputs)\n- Loader/Saver clip paths are valid\n- key input values are set correctly\n- render range and resolution match expectations\n- comp saves successfully if persistence is required\n\n### Resource Contention Rule\n- Treat renders (Saver render, Renderer3D) as potentially heavy.\n- Prefer `comp.Lock()` / `comp.Unlock()` around batch tool creation to avoid redundant UI updates.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n1. Run deterministic validation scripts (check tool existence, connections, settings).\n2. Confirm created tools are properly wired in the flow.\n3. Fix and re-verify on failure (up to 3 attempts).\n4. Report success only with explicit PASS evidence.\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success from assumptions.\n- Do not use Bash/Write/Edit for comp mutation — use bridge execution.",
+      "skills": [
+        {
+          "slug": "verification",
+          "file": "blackmagic-fusion/skills/verification.md",
+          "title": "Verification & Quality Assessment",
+          "category": "bridge"
+        }
+      ]
     },
     {
       "id": "nuke",
       "name": "Nuke Bridge",
-      "description": "Python package for Nuke 13+ \u2014 context capture, file apply, Python/TCL execution",
+      "description": "Python package for Nuke 13+ — context capture, file apply, Python/TCL execution",
       "author": "Arkestrator",
       "official": true,
       "stability": "experimental",
@@ -327,6 +375,12 @@
           "slug": "node-patterns",
           "file": "nuke/skills/node-patterns.md",
           "title": "Node Patterns",
+          "category": "bridge"
+        },
+        {
+          "slug": "verification",
+          "file": "nuke/skills/verification.md",
+          "title": "Verification & Quality Assessment",
           "category": "bridge"
         }
       ],
