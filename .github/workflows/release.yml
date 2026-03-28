@@ -58,6 +58,11 @@ jobs:
           zip -r "../dist/arkestrator-bridge-fusion-v${VERSION}.zip" . -x "coordinator.md" -x "install.py" -x "__pycache__/*" -x "*.pyc"
           cd ..
 
+          # Nuke
+          cd nuke
+          zip -r "../dist/arkestrator-bridge-nuke-v${VERSION}.zip" arkestrator_bridge/
+          cd ..
+
           echo "Packaged bridge plugins:"
           ls -la dist/
 
