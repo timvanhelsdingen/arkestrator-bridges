@@ -236,6 +236,24 @@
       "coordinatorScript": "## Unity Agent - General Editor Coordinator\n\nYou are connected to a live Unity Editor through Arkestrator.\nUse `execute_command(target=\"unity\", language=\"unity_json\", script=\"...\")`.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unity Scripting API: https://docs.unity3d.com/ScriptReference/\n- GameObject API: https://docs.unity3d.com/ScriptReference/GameObject.html\n- AssetDatabase API: https://docs.unity3d.com/ScriptReference/AssetDatabase.html\n- EditorSceneManager API: https://docs.unity3d.com/ScriptReference/SceneManagement.EditorSceneManager.html\n- Undo API: https://docs.unity3d.com/ScriptReference/Undo.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context (active scene, selected objects/assets).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (scene/layout, prefab/asset, tooling, debug/fix).\n4. Reuse existing scene/prefab conventions when available.\n5. Output a short action plan and verification checks.\n\n### Scope Rules\n- Keep edits scoped to request.\n- Prefer targeted path-based operations over broad scene operations.\n- Avoid broad file scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Rules\n\nUse `unity_json` actions only (not raw C#).\nAfter each batch:\n1. re-read bridge context\n2. verify expected scene/object/asset changes\n3. run save/refresh actions when needed\n\nPrefer batch arrays for related operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify target objects/scenes/assets exist and are correct\n- confirm scene save/asset refresh when applicable\n- fix and retry on mismatch (up to 3 attempts)\n- report PASS evidence\n\n### Prohibited\n- Do not emit raw C# for bridge execution.\n- Do not skip post-change verification.",
       "skills": [
         {
+          "slug": "scene-hierarchy",
+          "file": "unity/skills/scene-hierarchy.md",
+          "title": "Scene Hierarchy",
+          "category": "bridge"
+        },
+        {
+          "slug": "scripting-patterns",
+          "file": "unity/skills/scripting-patterns.md",
+          "title": "Unity C# Scripting Patterns",
+          "category": "bridge"
+        },
+        {
+          "slug": "prefabs-and-assets",
+          "file": "unity/skills/prefabs-and-assets.md",
+          "title": "Prefabs & Assets",
+          "category": "bridge"
+        },
+        {
           "slug": "verification",
           "file": "unity/skills/verification.md",
           "title": "Verification & Quality Assessment",
@@ -281,6 +299,24 @@
       },
       "coordinatorScript": "## Unreal Engine Agent - General Editor Coordinator\n\nYou are connected to Unreal through Arkestrator.\nUse `execute_command(target=\"unreal\", language=\"python\", script=\"...\")` for Python,\nor `language=\"ue_console\"` for console commands.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unreal Python API: https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/\n- Unreal editor Python scripting: https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python\n- Unreal console commands reference: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-console-commands-reference\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore execution:\n1. Review pre-loaded context (level, assets, project state).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (level/layout, asset pipeline, gameplay tooling, debug/fix).\n4. Reuse existing asset/path conventions when references exist.\n5. Output a short plan and verification checks.\n\n### Scope Rules\n- Keep edits request-scoped.\n- Prefer targeted asset/actor operations.\n- Avoid broad machine-wide scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Loop\n\n1. Write focused Python/console command.\n2. Execute.\n3. Fix errors immediately.\n4. Verify actor/asset state.\n5. Repeat until checks pass (max 3 fix loops).\n\nUse `/Game/...` paths consistently for content operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify created/edited actors/assets exist and are valid\n- verify properties/locations/paths match request\n- save required assets/levels\n- report explicit PASS evidence\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success without deterministic checks.",
       "skills": [
+        {
+          "slug": "blueprint-patterns",
+          "file": "unreal/skills/blueprint-patterns.md",
+          "title": "Blueprint Patterns",
+          "category": "bridge"
+        },
+        {
+          "slug": "cpp-gameplay",
+          "file": "unreal/skills/cpp-gameplay.md",
+          "title": "C++ Gameplay Patterns",
+          "category": "bridge"
+        },
+        {
+          "slug": "level-design",
+          "file": "unreal/skills/level-design.md",
+          "title": "Level Design",
+          "category": "bridge"
+        },
         {
           "slug": "verification",
           "file": "unreal/skills/verification.md",
