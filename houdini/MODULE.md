@@ -3,12 +3,11 @@
 ## Purpose
 Houdini Python package that connects to the Arkestrator server via WebSocket. Thin execution endpoint: pushes editor context, applies file changes, executes Python/HScript commands, and supports cross-bridge communication. All prompt/submission UI lives in the Tauri client.
 
-## Recent Updates (2026-03-15)
-- Connection stability improvements (2026-03-15): `ws_client.py` stale timeout increased from 90s to 180s for more tolerance of idle connections. Handshake retry support added (2 attempts with 0.5s delay) so transient handshake failures do not immediately fail the connection.
-
-## Previous Updates (2026-03-13)
-- Shared-config auth fallback hardening: `ws_client.py` now ignores malformed shared `apiKey` rewrites and retries reconnects with the last known-good key before failing. A bad `~/.arkestrator/config.json` write no longer strands Houdini offline after the next disconnect.
-- Remote-relay reconnect hardening: when the desktop client's localhost relay becomes stale or disappears, `ws_client.py` now tries the shared-config `remoteWsUrl` directly during reconnect instead of staying pinned to a dead `127.0.0.1:<relay-port>` target. This keeps same-machine remote-server setups alive after relay failures.
+## Connection & Auth Behavior
+- **Stale timeout**: `ws_client.py` uses a 180s stale timeout for tolerance of idle connections.
+- **Handshake retry**: 2 attempts with 0.5s delay so transient handshake failures do not immediately fail the connection.
+- **Auth fallback**: `ws_client.py` ignores malformed shared `apiKey` rewrites and retries reconnects with the last known-good key before failing. Tolerates bad `~/.arkestrator/config.json` writes without going offline.
+- **Remote-relay fallback**: When the desktop client's localhost relay becomes stale or disappears, `ws_client.py` tries the shared-config `remoteWsUrl` directly during reconnect, keeping same-machine remote-server setups alive.
 
 ## Architecture (v1.0.0 -- Thin Bridge)
 Same thin bridge pattern as the Blender bridge. Bridges are execution endpoints only. They do NOT submit jobs or display job management UI. They provide:
@@ -27,8 +26,8 @@ Same thin bridge pattern as the Blender bridge. Bridges are execution endpoints 
 - `arkestrator_bridge.json` now resolves the bridge root relative to the package file itself via `ARKESTRATOR_BRIDGE_DIR=$HOUDINI_PACKAGE_PATH/arkestrator_bridge`, then appends that directory to `HOUDINI_PATH` so repo checkouts and copied installs use the same layout across Windows, macOS, and Linux.
 - `scripts/python/pythonrc.py` fallback resolution now derives candidate user-pref directories from Houdini/version context instead of assuming a Linux-only `~/houdini21.0` path.
 - GUI startup now schedules one delayed reconnect watchdog via `startup_bootstrap.py`: if Houdini has still not established a bridge socket a few seconds after UI-ready, it re-reads shared config, forces one clean reconnect attempt, and writes connect/error/disconnect events to `~/Library/Preferences/houdini/21.0/arkestrator_startup.log`.
-- Shared machine-identity follow pass: `ws_client.py` now consumes client-owned `workerName` and `machineId` from `~/.arkestrator/config.json`, sends `machineId` on the bridge query string, and hot-reconnects when shared identity changes so Houdini attaches to the same persistent worker row as the desktop client.
-- WS auth/key rotation resilience: `ws_client.py` now reloads `~/.arkestrator/config.json` while reconnecting (and during read-loop timeouts), ignores malformed shared `apiKey` rewrites, and retries with the last known-good key if the newly shared auth no longer works.
+- Shared machine-identity: `ws_client.py` consumes client-owned `workerName` and `machineId` from `~/.arkestrator/config.json`, sends `machineId` on the bridge query string, and hot-reconnects when shared identity changes so Houdini attaches to the same persistent worker row as the desktop client.
+- WS auth/key rotation resilience: `ws_client.py` reloads `~/.arkestrator/config.json` while reconnecting (and during read-loop timeouts), ignores malformed shared `apiKey` rewrites, and retries with the last known-good key if the newly shared auth fails.
 
 ## Installation
 Copy the `arkestrator_bridge` package to one of:

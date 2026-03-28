@@ -3,16 +3,14 @@
 ## Purpose
 Blender addon that connects to the Arkestrator server via WebSocket. Thin execution endpoint: pushes editor context, applies file changes, executes Python commands, and supports cross-bridge communication. All prompt/submission UI lives in the Tauri client -- the bridge has no job creation UI.
 
-## Recent Updates (2026-03-15)
-- Connection stability improvements (2026-03-15): `ws_client.py` stale timeout increased from 90s to 180s for more tolerance of idle connections. Handshake retry support added (2 attempts with 0.5s delay) so transient handshake failures (relay hiccups, DNS blips) do not immediately fail the connection.
-
-## Previous Updates (2026-03-09)
-- Shared-config auth fallback hardening (2026-03-13): `ws_client.py` now ignores malformed shared `apiKey` rewrites and, during reconnect, retries with the last known-good key before giving up. A bad `~/.arkestrator/config.json` write no longer permanently bricks Blender after the next disconnect.
-- Remote-relay reconnect hardening (2026-03-13): when the desktop client's localhost relay is unavailable or stops answering during reconnect, `ws_client.py` now tries the shared-config `remoteWsUrl` as a direct fallback instead of leaving the Blender bridge offline behind a dead `127.0.0.1:<relay-port>` target.
-- Runtime menu-discovery coverage pass (2026-03-11): `Add to Arkestrator Context` is no longer wired through a small fixed `_MENU_SPECS` list. The addon now discovers Blender `Menu` types at runtime, appends itself to all available `*_context_menu` surfaces plus important Outliner submenus, and adds explicit file-browser / asset-browser capture with a generic context snapshot fallback for RMB menus that do not expose a clean selection API.
-- Machine-ID shared-identity follow refactor (2026-03-11): the Blender bridge now also follows the client-owned `machineId` from `~/.arkestrator/config.json` and sends it on the WS query string, so remote servers can attach the bridge to the same persistent worker record even when bridge hostnames drift.
-- Client-owned worker-name follow fix (2026-03-11): the Blender bridge no longer invents its own hostname fallback for `workerName`. It now follows the canonical `workerName` written by the desktop client into `~/.arkestrator/config.json` (or an explicit bridge override if provided), keeping same-machine bridge registrations aligned with the client’s worker identity in Workers.
-- Shared-config remote URL follow fix (2026-03-09): manual connect, deferred auto-connect, and reconnect hot-refresh now treat any loopback/default WebSocket URL (`localhost`, `127.0.0.1`, `::1`, or blank) as shared-config-following. If `~/.arkestrator/config.json` contains a remote `wsUrl` from the desktop client login (for example a TrueNAS-hosted server), the Blender bridge now adopts that remote URL consistently instead of sticking to local defaults unless the user explicitly set a non-loopback custom URL in Blender preferences.
+## Connection & Auth Behavior
+- **Stale timeout**: `ws_client.py` uses a 180s stale timeout for tolerance of idle connections.
+- **Handshake retry**: 2 attempts with 0.5s delay so transient handshake failures (relay hiccups, DNS blips) do not immediately fail the connection.
+- **Auth fallback**: `ws_client.py` ignores malformed shared `apiKey` rewrites and retries reconnect with the last known-good key before giving up. Tolerates bad `~/.arkestrator/config.json` writes without going offline permanently.
+- **Remote-relay fallback**: When the desktop client’s localhost relay is unavailable during reconnect, `ws_client.py` tries the shared-config `remoteWsUrl` as a direct fallback.
+- **Shared-config URL following**: Manual connect, deferred auto-connect, and reconnect treat any loopback/default WebSocket URL (`localhost`, `127.0.0.1`, `::1`, or blank) as shared-config-following. If `~/.arkestrator/config.json` contains a remote `wsUrl` from the desktop client login, the bridge adopts that remote URL unless the user explicitly set a non-loopback custom URL in Blender preferences.
+- **Shared identity**: The bridge follows the client-owned `workerName` and `machineId` from `~/.arkestrator/config.json` and sends `machineId` on the WS query string, so remote servers attach the bridge to the same persistent worker record.
+- **Runtime menu discovery**: `Add to Arkestrator Context` discovers Blender `Menu` types at runtime, appends itself to all available `*_context_menu` surfaces plus Outliner submenus, and adds file-browser / asset-browser capture with a generic context snapshot fallback for RMB menus.
 
 ## Architecture (v2.0.0 -- Thin Bridge)
 Bridges are execution endpoints only. They do NOT submit jobs, display job management UI, or maintain local caches of configs/projects/jobs. The Tauri client handles all prompt/submission/queue management. Bridges provide:
@@ -247,4 +245,4 @@ The following were removed as job submission UI moved to the Tauri client:
 - `agent_config_list_response`, `job_list_response`, `project_list_response`
 
 **Caches removed:**
-- Local caches for agent configs, projects, and jobs (previously used for enum dropdowns)
+- Local caches for agent configs, projects, and jobs (were used for enum dropdowns in v1)

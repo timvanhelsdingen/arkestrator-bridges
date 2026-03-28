@@ -5,15 +5,13 @@
 ## Purpose
 Godot 4.6 EditorPlugin that connects to the Arkestrator server via WebSocket. Acts as a thin execution endpoint: pushes editor context and context items to the server, applies file changes, and executes GDScript commands. All prompt/submission UI and job management lives in the Tauri client - the bridge has no Task tab, no job submission, no agent config selector, no log viewer, no cancel button, and no dashboard button.
 
-## Recent Updates (2026-03-15)
-- Connection stability improvements (2026-03-15): `ws_client.gd` now logs close code and close reason on disconnect for diagnostics. Added 15s connect timeout (`CONNECT_TIMEOUT_S`) that triggers a retry when the WS handshake takes too long.
-
-## Previous Updates (2026-03-11)
-- Shared-config auth fallback hardening (2026-03-13): `plugin.gd` now ignores malformed shared `apiKey` rewrites, `ws_client.gd` keeps a last known-good key for reconnect attempts, and reconnect no longer dies permanently just because `~/.arkestrator/config.json` was rewritten badly during a run.
-- Remote-relay reconnect hardening (2026-03-13): Godot's `ws_client.gd` now tries shared `remoteWsUrl` when reconnecting through a dead desktop-owned localhost relay, so remote-server sessions do not stay offline just because the local relay port disappeared.
-- Shared machine-identity follow pass (2026-03-11): Godot now follows the client-owned `workerName` and `machineId` from `~/.arkestrator/config.json`, includes `machineId` on the WebSocket query string, and hot-reconnects when shared identity changes so the bridge collapses onto the same worker row as the desktop client.
-- Command-mode autosave safety fix (2026-02-26): `_on_job_complete` no longer auto-saves scenes for command-mode completions. Auto-save now runs only for file-apply flows (`repo`/`sync`) to avoid save-trigger instability after live command execution.
-- Shared-credential hot-reload pass (2026-03-01): bridge now monitors `~/.arkestrator/config.json` while connected/reconnecting and auto-reconnects when shared `apiKey` (and shared-followed `wsUrl`) changes, so local/remote server switches don’t require manual plugin reset.
+## Connection & Auth Behavior
+- **Connect timeout**: `ws_client.gd` uses a 15s connect timeout (`CONNECT_TIMEOUT_S`) that triggers a retry when the WS handshake takes too long. Logs close code and close reason on disconnect for diagnostics.
+- **Auth fallback**: `plugin.gd` ignores malformed shared `apiKey` rewrites, `ws_client.gd` keeps a last known-good key for reconnect attempts, and tolerates bad `~/.arkestrator/config.json` writes without dying permanently.
+- **Remote-relay fallback**: `ws_client.gd` tries shared `remoteWsUrl` when reconnecting through a dead desktop-owned localhost relay, keeping remote-server sessions alive.
+- **Shared identity**: Follows the client-owned `workerName` and `machineId` from `~/.arkestrator/config.json`, includes `machineId` on the WebSocket query string, and hot-reconnects when shared identity changes so the bridge collapses onto the same worker row as the desktop client.
+- **Command-mode autosave**: `_on_job_complete` only auto-saves scenes for file-apply flows (`repo`/`sync`), not command-mode completions, to avoid save-trigger instability after live command execution.
+- **Shared-credential hot-reload**: Monitors `~/.arkestrator/config.json` while connected/reconnecting and auto-reconnects when shared `apiKey` or `wsUrl` changes, so local/remote server switches work without manual plugin reset.
 
 ## Files (5 + config)
 | File | Purpose |
