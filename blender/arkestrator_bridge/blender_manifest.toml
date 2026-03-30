@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "arkestrator_bridge"
-version = "0.1.53"
+version = "0.1.54"
 name = "Arkestrator Bridge"
 tagline = "Connect Blender to the Arkestrator hub for AI-assisted workflows"
 maintainer = "Arkestrator <noreply@example.com>"
