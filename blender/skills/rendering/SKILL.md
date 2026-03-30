@@ -1,7 +1,14 @@
 ---
-title: Rendering
-category: bridge
+name: rendering
+description: "Rendering patterns and best practices for blender"
+metadata:
+  program: blender
+  category: bridge
+  title: Rendering
+  keywords: ["blender", "rendering"]
+  source: bridge-repo
 ---
+
 # Blender Rendering
 
 ## Render Setup

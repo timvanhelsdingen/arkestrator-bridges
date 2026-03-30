@@ -1,3 +1,14 @@
+---
+name: node-patterns
+description: "Node Patterns patterns and best practices for nuke"
+metadata:
+  program: nuke
+  category: bridge
+  title: Node Patterns
+  keywords: ["nuke", "node-patterns"]
+  source: bridge-repo
+---
+
 # Nuke Node Graph Patterns
 
 ## Common Node Categories

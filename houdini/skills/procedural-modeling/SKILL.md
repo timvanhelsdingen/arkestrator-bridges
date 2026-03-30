@@ -1,7 +1,14 @@
 ---
-title: Procedural Modeling
-category: bridge
+name: procedural-modeling
+description: "Procedural Modeling patterns and best practices for houdini"
+metadata:
+  program: houdini
+  category: bridge
+  title: Procedural Modeling
+  keywords: ["houdini", "procedural-modeling"]
+  source: bridge-repo
 ---
+
 # Houdini Procedural Modeling
 
 ## Copy to Points Pattern

@@ -1,7 +1,14 @@
 ---
-title: Workflow Patterns
-category: bridge
+name: workflow-patterns
+description: "Workflow Patterns patterns and best practices for comfyui"
+metadata:
+  program: comfyui
+  category: bridge
+  title: Workflow Patterns
+  keywords: ["comfyui", "workflow-patterns"]
+  source: bridge-repo
 ---
+
 # ComfyUI Workflow Patterns
 
 ## Node Creation

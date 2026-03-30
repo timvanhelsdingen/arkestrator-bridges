@@ -1,7 +1,14 @@
 ---
-title: SOP Networks
-category: bridge
+name: sop-networks
+description: "SOP Networks patterns and best practices for houdini"
+metadata:
+  program: houdini
+  category: bridge
+  title: SOP Networks
+  keywords: ["houdini", "sop-networks"]
+  source: bridge-repo
 ---
+
 # Houdini SOP Networks
 
 ## Creating Geometry Nodes

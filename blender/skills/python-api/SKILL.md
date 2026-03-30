@@ -1,3 +1,14 @@
+---
+name: python-api
+description: "Python Api patterns and best practices for blender"
+metadata:
+  program: blender
+  category: bridge
+  title: Python Api
+  keywords: ["blender", "python-api"]
+  source: bridge-repo
+---
+
 # Blender Python API Patterns
 
 ## Official Documentation

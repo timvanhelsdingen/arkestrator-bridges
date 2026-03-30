@@ -1,3 +1,14 @@
+---
+name: api-patterns
+description: "Api Patterns patterns and best practices for comfyui"
+metadata:
+  program: comfyui
+  category: bridge
+  title: Api Patterns
+  keywords: ["comfyui", "api-patterns"]
+  source: bridge-repo
+---
+
 # ComfyUI API Patterns
 
 ## Official Documentation

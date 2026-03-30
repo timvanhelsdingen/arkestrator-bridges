@@ -1,3 +1,14 @@
+---
+name: compositing
+description: "Compositing patterns and best practices for nuke"
+metadata:
+  program: nuke
+  category: bridge
+  title: Compositing
+  keywords: ["nuke", "compositing"]
+  source: bridge-repo
+---
+
 # Nuke Compositing Patterns
 
 ## Official Documentation

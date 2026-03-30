@@ -1,3 +1,14 @@
+---
+name: gdscript-api
+description: "Gdscript Api patterns and best practices for godot"
+metadata:
+  program: godot
+  category: bridge
+  title: Gdscript Api
+  keywords: ["godot", "gdscript-api"]
+  source: bridge-repo
+---
+
 # GDScript API Patterns
 
 ## Official Documentation

@@ -1,3 +1,14 @@
+---
+name: hom-scripting
+description: "Hom Scripting patterns and best practices for houdini"
+metadata:
+  program: houdini
+  category: bridge
+  title: Hom Scripting
+  keywords: ["houdini", "hom-scripting"]
+  source: bridge-repo
+---
+
 # Houdini HOM/Python Scripting
 
 ## Official Documentation

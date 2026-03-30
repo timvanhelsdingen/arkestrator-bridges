@@ -1,7 +1,14 @@
 ---
-title: Materials & Shading
-category: bridge
+name: materials-and-shading
+description: "Materials & Shading patterns and best practices for blender"
+metadata:
+  program: blender
+  category: bridge
+  title: Materials & Shading
+  keywords: ["blender", "materials-and-shading"]
+  source: bridge-repo
 ---
+
 # Blender Materials & Shading
 
 ## Creating Materials via bpy

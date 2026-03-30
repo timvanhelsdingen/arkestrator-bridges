@@ -1,7 +1,14 @@
 ---
-title: Scene Management
-category: bridge
+name: scene-management
+description: "Scene Management patterns and best practices for godot"
+metadata:
+  program: godot
+  category: bridge
+  title: Scene Management
+  keywords: ["godot", "scene-management"]
+  source: bridge-repo
 ---
+
 # Godot Scene Management
 
 ## Creating Scenes via EditorInterface

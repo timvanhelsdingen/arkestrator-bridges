@@ -1,7 +1,14 @@
 ---
-title: GDScript Patterns
-category: bridge
+name: scripting-patterns
+description: "GDScript Patterns patterns and best practices for godot"
+metadata:
+  program: godot
+  category: bridge
+  title: GDScript Patterns
+  keywords: ["godot", "scripting-patterns"]
+  source: bridge-repo
 ---
+
 # Godot GDScript Patterns
 
 ## Writing Scripts from Agent

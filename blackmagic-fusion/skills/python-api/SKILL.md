@@ -1,3 +1,14 @@
+---
+name: python-api
+description: "Python Api patterns and best practices for blackmagic-fusion"
+metadata:
+  program: fusion
+  category: bridge
+  title: Python Api
+  keywords: ["fusion", "python-api"]
+  source: bridge-repo
+---
+
 # Fusion Python API Patterns
 
 ## Official Documentation

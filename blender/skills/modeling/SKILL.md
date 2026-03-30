@@ -1,7 +1,14 @@
 ---
-title: Modeling Basics
-category: bridge
+name: modeling
+description: "Modeling Basics patterns and best practices for blender"
+metadata:
+  program: blender
+  category: bridge
+  title: Modeling Basics
+  keywords: ["blender", "modeling"]
+  source: bridge-repo
 ---
+
 # Blender Modeling
 
 ## Creating Primitives

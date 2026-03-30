@@ -1,3 +1,14 @@
+---
+name: python-api
+description: "Python Api patterns and best practices for nuke"
+metadata:
+  program: nuke
+  category: bridge
+  title: Python Api
+  keywords: ["nuke", "python-api"]
+  source: bridge-repo
+---
+
 # Nuke Python API Patterns
 
 ## Official Documentation
