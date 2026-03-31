@@ -5,7 +5,7 @@ metadata:
   program: fusion
   category: coordinator
   title: Blackmagic-fusion Coordinator
-  keywords: ["fusion", "coordinator", "bridge"]
+  keywords: ["fusion", "coordinator", "bridge", "python", "lua", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

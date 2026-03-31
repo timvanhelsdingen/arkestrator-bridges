@@ -5,8 +5,9 @@ metadata:
   program: blender
   category: bridge
   title: Python Api
-  keywords: ["blender", "python-api"]
+  keywords: ["blender", "bpy", "python", "api", "operators", "data", "context"]
   source: bridge-repo
+  related-skills: ["materials-and-shading", "modeling", "rendering"]
 ---
 
 # Blender Python API Patterns

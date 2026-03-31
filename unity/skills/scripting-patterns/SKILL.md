@@ -5,8 +5,9 @@ metadata:
   program: unity
   category: bridge
   title: Unity C# Scripting Patterns
-  keywords: ["unity", "scripting-patterns"]
+  keywords: ["unity", "csharp", "monobehaviour", "coroutine", "serialization"]
   source: bridge-repo
+  related-skills: ["scene-hierarchy", "prefabs-and-assets"]
 ---
 
 # Unity C# Scripting Patterns

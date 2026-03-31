@@ -5,8 +5,9 @@ metadata:
   program: blender
   category: bridge
   title: Materials & Shading
-  keywords: ["blender", "materials-and-shading"]
+  keywords: ["blender", "materials", "shading", "nodes", "principled-bsdf", "texture", "cycles", "eevee"]
   source: bridge-repo
+  related-skills: ["rendering", "python-api"]
 ---
 
 # Blender Materials & Shading

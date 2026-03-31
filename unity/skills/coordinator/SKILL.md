@@ -5,7 +5,7 @@ metadata:
   program: unity
   category: coordinator
   title: Unity Coordinator
-  keywords: ["unity", "coordinator", "bridge"]
+  keywords: ["unity", "coordinator", "bridge", "csharp", "editor", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

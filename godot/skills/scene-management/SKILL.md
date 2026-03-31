@@ -5,8 +5,9 @@ metadata:
   program: godot
   category: bridge
   title: Scene Management
-  keywords: ["godot", "scene-management"]
+  keywords: ["godot", "scene", "nodes", "tree", "instantiate", "signals"]
   source: bridge-repo
+  related-skills: ["scripting-patterns", "gdscript-api"]
 ---
 
 # Godot Scene Management

@@ -5,7 +5,7 @@ metadata:
   program: nuke
   category: coordinator
   title: Nuke Coordinator
-  keywords: ["nuke", "coordinator", "bridge"]
+  keywords: ["nuke", "coordinator", "bridge", "python", "nuke-api", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

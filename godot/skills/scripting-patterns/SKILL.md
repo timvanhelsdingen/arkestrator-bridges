@@ -5,8 +5,9 @@ metadata:
   program: godot
   category: bridge
   title: GDScript Patterns
-  keywords: ["godot", "scripting-patterns"]
+  keywords: ["godot", "gdscript", "patterns", "signals", "export", "ready"]
   source: bridge-repo
+  related-skills: ["scene-management", "gdscript-api"]
 ---
 
 # Godot GDScript Patterns

@@ -5,7 +5,7 @@ metadata:
   program: blender
   category: coordinator
   title: Blender Coordinator
-  keywords: ["blender", "coordinator", "bridge"]
+  keywords: ["blender", "coordinator", "bridge", "bpy", "python", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

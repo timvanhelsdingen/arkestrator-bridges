@@ -5,8 +5,9 @@ metadata:
   program: comfyui
   category: bridge
   title: Workflow Patterns
-  keywords: ["comfyui", "workflow-patterns"]
+  keywords: ["comfyui", "workflow", "ksampler", "checkpoint", "vae", "clip", "nodes"]
   source: bridge-repo
+  related-skills: ["api-patterns"]
 ---
 
 # ComfyUI Workflow Patterns

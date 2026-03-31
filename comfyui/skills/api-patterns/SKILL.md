@@ -5,8 +5,9 @@ metadata:
   program: comfyui
   category: bridge
   title: Api Patterns
-  keywords: ["comfyui", "api-patterns"]
+  keywords: ["comfyui", "api", "queue", "prompt", "websocket", "rest", "nodes"]
   source: bridge-repo
+  related-skills: ["workflow-patterns"]
 ---
 
 # ComfyUI API Patterns

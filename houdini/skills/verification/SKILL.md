@@ -5,7 +5,7 @@ metadata:
   program: houdini
   category: bridge
   title: Verification & Quality Assessment
-  keywords: ["houdini", "verification"]
+  keywords: ["houdini", "verification", "validation", "testing", "quality"]
   source: bridge-repo
   auto-fetch: true
   priority: 60

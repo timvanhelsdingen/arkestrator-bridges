@@ -5,8 +5,9 @@ metadata:
   program: nuke
   category: bridge
   title: Compositing
-  keywords: ["nuke", "compositing"]
+  keywords: ["nuke", "compositing", "merge", "grade", "keying", "roto", "layers"]
   source: bridge-repo
+  related-skills: ["node-patterns", "python-api"]
 ---
 
 # Nuke Compositing Patterns

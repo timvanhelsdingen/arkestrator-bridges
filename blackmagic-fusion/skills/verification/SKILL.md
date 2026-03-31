@@ -5,7 +5,7 @@ metadata:
   program: fusion
   category: bridge
   title: Verification & Quality Assessment
-  keywords: ["fusion", "verification"]
+  keywords: ["fusion", "verification", "validation", "testing", "quality"]
   source: bridge-repo
   auto-fetch: true
   priority: 60

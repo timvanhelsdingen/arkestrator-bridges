@@ -5,8 +5,9 @@ metadata:
   program: nuke
   category: bridge
   title: Node Patterns
-  keywords: ["nuke", "node-patterns"]
+  keywords: ["nuke", "nodes", "graph", "channels", "expressions", "tcl"]
   source: bridge-repo
+  related-skills: ["compositing", "python-api"]
 ---
 
 # Nuke Node Graph Patterns

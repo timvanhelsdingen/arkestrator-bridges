@@ -5,7 +5,7 @@ metadata:
   program: houdini
   category: coordinator
   title: Houdini Coordinator
-  keywords: ["houdini", "coordinator", "bridge"]
+  keywords: ["houdini", "coordinator", "bridge", "hou", "python", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

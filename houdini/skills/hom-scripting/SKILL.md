@@ -5,8 +5,9 @@ metadata:
   program: houdini
   category: bridge
   title: Hom Scripting
-  keywords: ["houdini", "hom-scripting"]
+  keywords: ["houdini", "hom", "python", "hou", "scripting", "api", "parms"]
   source: bridge-repo
+  related-skills: ["sop-networks", "procedural-modeling"]
 ---
 
 # Houdini HOM/Python Scripting

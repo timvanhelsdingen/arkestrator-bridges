@@ -5,8 +5,9 @@ metadata:
   program: blender
   category: bridge
   title: Rendering
-  keywords: ["blender", "rendering"]
+  keywords: ["blender", "rendering", "cycles", "eevee", "camera", "lighting", "output"]
   source: bridge-repo
+  related-skills: ["materials-and-shading"]
 ---
 
 # Blender Rendering

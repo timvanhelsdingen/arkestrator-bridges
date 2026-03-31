@@ -5,8 +5,9 @@ metadata:
   program: houdini
   category: bridge
   title: SOP Networks
-  keywords: ["houdini", "sop-networks"]
+  keywords: ["houdini", "sop", "geometry", "nodes", "networks", "wrangle", "vex"]
   source: bridge-repo
+  related-skills: ["procedural-modeling", "hom-scripting"]
 ---
 
 # Houdini SOP Networks

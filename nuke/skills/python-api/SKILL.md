@@ -5,8 +5,9 @@ metadata:
   program: nuke
   category: bridge
   title: Python Api
-  keywords: ["nuke", "python-api"]
+  keywords: ["nuke", "python", "api", "nuke-module", "callbacks", "knobs"]
   source: bridge-repo
+  related-skills: ["compositing", "node-patterns"]
 ---
 
 # Nuke Python API Patterns

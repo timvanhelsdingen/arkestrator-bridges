@@ -5,8 +5,9 @@ metadata:
   program: unreal
   category: bridge
   title: Blueprint Patterns
-  keywords: ["unreal", "blueprint-patterns"]
+  keywords: ["unreal", "blueprint", "nodes", "graph", "variables", "events"]
   source: bridge-repo
+  related-skills: ["cpp-gameplay", "level-design"]
 ---
 
 # Unreal Blueprint Patterns

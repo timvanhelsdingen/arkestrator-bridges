@@ -5,8 +5,9 @@ metadata:
   program: unreal
   category: bridge
   title: Level Design
-  keywords: ["unreal", "level-design"]
+  keywords: ["unreal", "level", "design", "landscape", "lighting", "materials"]
   source: bridge-repo
+  related-skills: ["blueprint-patterns", "cpp-gameplay"]
 ---
 
 # Unreal Level Design

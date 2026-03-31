@@ -5,7 +5,7 @@ metadata:
   program: comfyui
   category: coordinator
   title: Comfyui Coordinator
-  keywords: ["comfyui", "coordinator", "bridge"]
+  keywords: ["comfyui", "coordinator", "bridge", "workflow", "api", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

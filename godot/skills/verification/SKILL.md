@@ -5,7 +5,7 @@ metadata:
   program: godot
   category: bridge
   title: Verification & Quality Assessment
-  keywords: ["godot", "verification"]
+  keywords: ["godot", "verification", "validation", "headless", "testing"]
   source: bridge-repo
   auto-fetch: true
   priority: 60

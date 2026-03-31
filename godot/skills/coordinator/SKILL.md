@@ -5,7 +5,7 @@ metadata:
   program: godot
   category: coordinator
   title: Godot Coordinator
-  keywords: ["godot", "coordinator", "bridge"]
+  keywords: ["godot", "coordinator", "bridge", "gdscript", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

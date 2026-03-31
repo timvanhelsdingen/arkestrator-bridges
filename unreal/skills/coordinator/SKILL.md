@@ -5,7 +5,7 @@ metadata:
   program: unreal
   category: coordinator
   title: Unreal Coordinator
-  keywords: ["unreal", "coordinator", "bridge"]
+  keywords: ["unreal", "coordinator", "bridge", "python", "blueprint", "execute_command"]
   source: bridge-repo
   priority: 70
   auto-fetch: true

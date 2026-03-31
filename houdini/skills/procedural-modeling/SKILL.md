@@ -5,8 +5,9 @@ metadata:
   program: houdini
   category: bridge
   title: Procedural Modeling
-  keywords: ["houdini", "procedural-modeling"]
+  keywords: ["houdini", "procedural", "modeling", "copy-to-points", "scatter", "for-each"]
   source: bridge-repo
+  related-skills: ["sop-networks", "hom-scripting"]
 ---
 
 # Houdini Procedural Modeling

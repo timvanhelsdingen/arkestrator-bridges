@@ -5,8 +5,9 @@ metadata:
   program: unreal
   category: bridge
   title: C++ Gameplay Patterns
-  keywords: ["unreal", "cpp-gameplay"]
+  keywords: ["unreal", "cpp", "gameplay", "actor", "component", "uclass"]
   source: bridge-repo
+  related-skills: ["blueprint-patterns", "level-design"]
 ---
 
 # Unreal C++ Gameplay Patterns

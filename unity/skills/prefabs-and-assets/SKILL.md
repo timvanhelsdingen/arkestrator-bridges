@@ -5,8 +5,9 @@ metadata:
   program: unity
   category: bridge
   title: Prefabs & Assets
-  keywords: ["unity", "prefabs-and-assets"]
+  keywords: ["unity", "prefab", "assets", "materials", "import", "resources"]
   source: bridge-repo
+  related-skills: ["scene-hierarchy", "scripting-patterns"]
 ---
 
 # Unity Prefabs & Asset Management

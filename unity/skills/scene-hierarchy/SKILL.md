@@ -5,8 +5,9 @@ metadata:
   program: unity
   category: bridge
   title: Scene Hierarchy
-  keywords: ["unity", "scene-hierarchy"]
+  keywords: ["unity", "scene", "hierarchy", "gameobject", "transform", "prefab"]
   source: bridge-repo
+  related-skills: ["scripting-patterns", "prefabs-and-assets"]
 ---
 
 # Unity Scene Hierarchy

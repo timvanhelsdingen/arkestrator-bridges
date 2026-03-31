@@ -5,7 +5,7 @@ metadata:
   program: blender
   category: bridge
   title: Verification & Quality Assessment
-  keywords: ["blender", "verification"]
+  keywords: ["blender", "verification", "validation", "testing", "quality"]
   source: bridge-repo
   auto-fetch: true
   priority: 60

@@ -5,8 +5,9 @@ metadata:
   program: godot
   category: bridge
   title: Gdscript Api
-  keywords: ["godot", "gdscript-api"]
+  keywords: ["godot", "gdscript", "api", "editor", "interface", "plugin"]
   source: bridge-repo
+  related-skills: ["scene-management", "scripting-patterns"]
 ---
 
 # GDScript API Patterns

@@ -5,8 +5,9 @@ metadata:
   program: blender
   category: bridge
   title: Modeling Basics
-  keywords: ["blender", "modeling"]
+  keywords: ["blender", "modeling", "mesh", "geometry", "modifiers", "subdivision", "boolean"]
   source: bridge-repo
+  related-skills: ["materials-and-shading", "python-api"]
 ---
 
 # Blender Modeling

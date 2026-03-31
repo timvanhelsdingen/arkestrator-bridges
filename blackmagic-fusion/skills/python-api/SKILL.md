@@ -5,7 +5,7 @@ metadata:
   program: fusion
   category: bridge
   title: Python Api
-  keywords: ["fusion", "python-api"]
+  keywords: ["fusion", "python", "api", "comp", "tool", "scripting"]
   source: bridge-repo
 ---
 

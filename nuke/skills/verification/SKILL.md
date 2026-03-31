@@ -5,7 +5,7 @@ metadata:
   program: nuke
   category: bridge
   title: Verification & Quality Assessment
-  keywords: ["nuke", "verification"]
+  keywords: ["nuke", "verification", "validation", "testing", "quality"]
   source: bridge-repo
   auto-fetch: true
   priority: 60

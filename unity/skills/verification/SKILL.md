@@ -5,7 +5,7 @@ metadata:
   program: unity
   category: bridge
   title: Verification & Quality Assessment
-  keywords: ["unity", "verification"]
+  keywords: ["unity", "verification", "validation", "testing", "quality"]
   source: bridge-repo
   auto-fetch: true
   priority: 60
