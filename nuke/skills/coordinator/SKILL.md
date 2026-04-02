@@ -26,6 +26,17 @@ Use `execute_command(target="nuke", language="python", script="...")` to run Pyt
 Scripts execute with full `nuke` module access. Use `language="tcl"` for TCL commands.
 All commands are executed in the main thread via `nuke.executeInMainThread()` for thread safety.
 
+**Persistent context:** Variables and node references persist across execute_command calls within the same job.
+Bridge helpers are pre-injected: `_ark_sync_graph()`, `_ark_all_nodes()`, `_ark_find_node("name")`.
+
+### Nuke NC (Non-Commercial) Critical Notes
+- `nuke.allNodes()` without a class filter returns inconsistent results -- use `_ark_all_nodes()` or `nuke.allNodes("ClassName")`
+- `nuke.toNode("name")` may return None -- use `_ark_find_node("name")` which syncs the graph first
+- `nuke.createNode()` may return None even when successful -- verify with `_ark_find_node()`
+- `node.dependent()` is the most reliable method for discovering node connections
+- `.nknc` files are encrypted -- always use the live session API, never read from disk
+- See `nuke-nc-workarounds` skill for full patterns and anti-patterns
+
 ## Skills
 Detailed operational knowledge for Nuke is provided via skills.
 Use `am skills search <query>` or `am skills list --program nuke` to discover available patterns, techniques, and best practices.
