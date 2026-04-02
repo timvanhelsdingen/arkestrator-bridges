@@ -27,7 +27,7 @@ arkestrator_bridge.register()
 |------|---------|
 | `__init__.py` | Main module: WS dispatch, editor context, register/unregister, auto-connect, public API (`get_bridge()`, `_BridgeAPI`). Timer polling via Qt QTimer (10Hz) with thread fallback for render/terminal mode. Tracks active script path changes and pushes updated context. Menu setup for top-level Arkestrator menu and node graph right-click. Context capture for selected nodes, viewer input, and full script. |
 | `ws_client.py` | WebSocket client using Python stdlib. Same as Blender/Houdini bridge but with `program=nuke`. `BRIDGE_VERSION = "1.0.0"`. Full reconnect path with shared-config credential refresh, remote relay fallback, and last-known-good key retry. |
-| `command_executor.py` | `execute_commands()` - Python via `exec()` + TCL via `nuke.tcl()` + NK paste via `nuke.nodePaste()`. All Python commands are executed in main thread via `nuke.executeInMainThread()`. |
+| `command_executor.py` | `execute_commands()` - Python via `exec()` + TCL via `nuke.tcl()` + NK paste via `nuke.nodePaste()`. Persistent execution context across commands (variables/node refs survive between calls). Includes node graph sync helpers (`_ark_sync_graph`, `_ark_all_nodes`, `_ark_find_node`) injected into exec globals. Session resets on new jobs and WS reconnect. Stdout/stderr captured and returned in result. |
 | `file_applier.py` | `apply_file_changes()` - create/modify/delete files on disk. Supports binary files via `binaryContent` base64 + `encoding` field. Path traversal protection via `os.path.realpath()`. |
 | `menu.py` | Integrated into `__init__.py._setup_menus()` -- adds Arkestrator top-level menu and Node Graph right-click submenu. |
 
@@ -75,10 +75,22 @@ arkestrator_bridge.register()
 File attachments: Python callback scripts, expression knobs, and BlinkScript kernels from selected nodes.
 
 ## Command Execution
-- **Python**: `exec(compile(...))` with `nuke` in globals, wrapped in `nuke.executeInMainThread()`
-- **TCL**: `nuke.tcl(script)` - returns result string
+- **Python**: `exec(compile(...))` with persistent session globals, wrapped in `nuke.executeInMainThread()`
+  - Session persists variables and node references across execute_command calls within a job
+  - Graph sync (`_sync_node_graph()`) runs before each Python command
+  - Bridge helpers injected: `_ark_sync_graph()`, `_ark_all_nodes(class_filter)`, `_ark_find_node(name)`
+  - Stdout/stderr captured and returned in the `output` field of the result
+  - Session resets on new jobs and WebSocket reconnects via `reset_session()`
+- **TCL**: `nuke.tcl(script)` - returns result string (most reliable for reading knob values)
 - **NK**: `nuke.nodePaste(script)` - pastes Nuke script snippet as nodes
 - Unsupported languages are skipped with error message
+
+### Nuke NC (Non-Commercial) Notes
+- `nuke.allNodes()` without class filter is unreliable -- use `_ark_all_nodes()` or class-filtered queries
+- `nuke.toNode()` may return None -- use `_ark_find_node()` with graph sync and fallback
+- `nuke.createNode()` may return None -- verify with `_ark_find_node()` after creation
+- `node.dependent()` is the most reliable method for graph traversal
+- `.nknc` files are encrypted and cannot be read from disk -- must use live session API
 
 ## Menu Integration
 - **Top-level menu**: `Nuke > Arkestrator` with Add Nodes/Viewer/Script to Context, Connect/Disconnect

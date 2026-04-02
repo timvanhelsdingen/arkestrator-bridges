@@ -7,7 +7,7 @@ metadata:
   title: Python Api
   keywords: ["nuke", "python", "api", "nuke-module", "callbacks", "knobs"]
   source: bridge-repo
-  related-skills: ["compositing", "node-patterns"]
+  related-skills: ["compositing", "node-patterns", "nuke-nc-workarounds"]
 ---
 
 # Nuke Python API Patterns
@@ -18,12 +18,17 @@ metadata:
 - Callbacks: https://learn.foundry.com/nuke/developers/latest/pythondevguide/callbacks.html
 
 ## Core API Access
-- `nuke.createNode("Type")` -- create a node
-- `nuke.toNode("name")` -- find node by name
+- `nuke.createNode("Type")` -- create a node (verify return value; may be None in NC)
+- `nuke.toNode("name")` -- find node by name (use `_ark_find_node()` for reliability)
 - `nuke.selectedNodes()` -- get selected nodes
-- `nuke.allNodes()` -- all nodes in current group
+- `nuke.allNodes("ClassName")` -- class-filtered query (PREFERRED, reliable)
+- `nuke.allNodes()` -- all nodes in current group (UNRELIABLE in NC -- use `_ark_all_nodes()`)
 - `nuke.root()` -- root node (project settings)
 - `nuke.executeInMainThread(func)` -- thread-safe execution
+- `node.dependent()` -- downstream nodes (MOST RELIABLE for graph traversal)
+- `node.dependencies()` -- upstream nodes (reliable)
+
+> **NC Note:** See `nuke-nc-workarounds` skill for critical patterns when working with Nuke Non-Commercial.
 
 ## Common Patterns
 
@@ -105,6 +110,12 @@ nuke.Layer("custom", ["custom.red", "custom.green", "custom.blue", "custom.alpha
 - Node graph operations MUST run on the main thread
 - Use `nuke.executeInMainThread(callable)` from background threads
 - The bridge handles this automatically for command execution
+
+## Persistent Execution Context
+- The bridge maintains a persistent Python context across `execute_command` calls
+- Variables, node references, and imports survive between commands within a job
+- Session resets on new jobs and WebSocket reconnects
+- Bridge helpers (`_ark_sync_graph`, `_ark_all_nodes`, `_ark_find_node`) are pre-injected
 
 ## Scope Rules
 - Keep edits narrowly scoped to the request

@@ -71,6 +71,8 @@ def _on_ws_connected():
     print("[ArkestratorBridge] WS connected!")
     _context_bag_next_index = 1
     _last_editor_context_hash = ""
+    # Reset command execution session on reconnect to avoid stale node refs
+    command_executor.reset_session()
     try:
         import nuke
         _connected_script_path = _script_path() or ""
@@ -130,10 +132,15 @@ def _handle_job_complete(payload: dict):
     if workspace_mode == "command" and commands_raw:
         # Execute commands in main thread for thread safety
         def _exec():
+            # Reset session for new jobs to avoid stale refs from previous jobs
+            command_executor.reset_session()
             result = command_executor.execute_commands(commands_raw)
             executed = result.get("executed", 0)
             failed = result.get("failed", 0)
+            output = result.get("output", "")
             print(f"[ArkestratorBridge] Commands: {executed} executed, {failed} failed")
+            if output:
+                print(f"[ArkestratorBridge] Output:\n{output}")
             for err in result.get("errors", []):
                 print(f"[ArkestratorBridge] cmd-error: {err}")
 
@@ -167,8 +174,11 @@ def _handle_bridge_command(payload: dict):
         failed = result.get("failed", 0)
         skipped = result.get("skipped", 0)
         errors = result.get("errors", [])
+        output = result.get("output", "")
 
         print(f"[ArkestratorBridge] Result: {executed} executed, {failed} failed, {skipped} skipped")
+        if output:
+            print(f"[ArkestratorBridge] Output:\n{output}")
 
         if _ws_client:
             _ws_client.send_bridge_command_result(
