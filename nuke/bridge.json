@@ -1,0 +1,95 @@
+{
+  "id": "nuke",
+  "name": "Nuke Bridge",
+  "description": "Python package for Nuke 13+ — context capture, file apply, Python/TCL execution",
+  "author": "Arkestrator",
+  "official": true,
+  "stability": "experimental",
+  "minArkestrator": "0.1.40",
+  "program": "nuke",
+  "installType": "user",
+  "platforms": [
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "repo": "timvanhelsdingen/arkestrator-bridges",
+  "asset": "arkestrator-bridge-nuke-v{version}.zip",
+  "sourceDir": "nuke",
+  "extractRoot": "arkestrator_bridge",
+  "skills": [
+    {
+      "slug": "compositing",
+      "file": "nuke/skills/compositing/SKILL.md",
+      "title": "Compositing",
+      "category": "bridge"
+    },
+    {
+      "slug": "python-api",
+      "file": "nuke/skills/python-api/SKILL.md",
+      "title": "Python API",
+      "category": "bridge"
+    },
+    {
+      "slug": "node-patterns",
+      "file": "nuke/skills/node-patterns/SKILL.md",
+      "title": "Node Patterns",
+      "category": "bridge"
+    },
+    {
+      "slug": "verification",
+      "file": "nuke/skills/verification/SKILL.md",
+      "title": "Verification & Quality Assessment",
+      "category": "bridge"
+    },
+    {
+      "slug": "nuke-nc-workarounds",
+      "file": "nuke/skills/nuke-nc-workarounds/SKILL.md",
+      "title": "Nuke NC Workarounds",
+      "category": "bridge"
+    }
+  ],
+  "installPath": {
+    "windows": "%USERPROFILE%/.nuke/arkestrator_bridge",
+    "macos": "~/.nuke/arkestrator_bridge",
+    "linux": "~/.nuke/arkestrator_bridge"
+  },
+  "detect": {
+    "windows": [
+      "%USERPROFILE%/.nuke/"
+    ],
+    "macos": [
+      "~/.nuke/"
+    ],
+    "linux": [
+      "~/.nuke/"
+    ]
+  },
+  "headless": {
+    "executable": "Nuke*",
+    "argsTemplate": [
+      "-t",
+      "{{SCRIPT_FILE}}"
+    ],
+    "language": "python",
+    "detect": {
+      "windows": [
+        "C:/Program Files/Nuke*/Nuke*.exe"
+      ],
+      "linux": [
+        "/usr/local/Nuke*/Nuke*"
+      ],
+      "macos": [
+        "/Applications/Nuke*/Nuke*.app/Contents/MacOS/Nuke*"
+      ]
+    }
+  },
+  "coordinatorScript": "## Nuke Agent - General Compositing Coordinator\n\nYou are connected to a live Nuke session through Arkestrator.\nUse `execute_command(target=\"nuke\", language=\"python\", script=\"...\")` for Python,\nor `language=\"tcl\"` for TCL commands.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Nuke Python Dev Guide: https://learn.foundry.com/nuke/developers/latest/pythondevguide/\n- Nuke Python Reference: https://learn.foundry.com/nuke/developers/latest/pythonreference/\n- TCL Scripting: https://learn.foundry.com/nuke/content/comp_environment/tcl_scripting/tcl_scripting.html\n- Node Reference: https://learn.foundry.com/nuke/content/reference_guide/node_reference.html\n\n---\n\n### CRITICAL: Nuke NC (Non-Commercial) Workarounds\n\nThe bridge maintains a **persistent Python context** across execute_command calls — variables and node references survive between commands within a job. The following helper functions are pre-injected:\n\n- `_ark_sync_graph()` — Force node graph synchronization before enumeration\n- `_ark_all_nodes(class_filter=\"\")` — Reliable allNodes() with multi-pass enumeration\n- `_ark_find_node(\"name\")` — Reliable toNode() with graph sync and fallback search\n\n**Known NC API Quirks (ALWAYS use workarounds):**\n- `nuke.allNodes()` without class filter returns inconsistent results — use `_ark_all_nodes()` or `nuke.allNodes(\"ClassName\")`\n- `nuke.toNode(\"name\")` may return None — use `_ark_find_node(\"name\")`\n- `nuke.createNode()` may return None even when successful — verify with `_ark_find_node()` after creation\n- `node.input(i)` may return None — use `node.dependent()` / `node.dependencies()` as fallback (MOST RELIABLE)\n- `.nknc` files are encrypted — always use the live session API, never read from disk\n- TCL `value nodename.knobname` is always reliable for reading known knob values\n\n**Reliable Node Enumeration Pattern:**\n```python\n# Use class-filtered queries\nreads = nuke.allNodes(\"Read\")\nwrites = nuke.allNodes(\"Write\")\n# Or use the bridge helper\nall_nodes = _ark_all_nodes()\n# Discover connections via dependencies (most reliable)\nnode = _ark_find_node(\"Write1\")\nupstream = node.dependencies()\n```\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec nuke --lang python --script '<code>'` or `am exec nuke --lang tcl --script '<code>'`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context (script, selected nodes, format, frame range).\n2. Classify task type (compositing, color correction, keying, tracking, paint/roto, 3D, render, pipeline/fix).\n3. Check matched project scripts/docs from repo/client source paths.\n4. Reuse project naming, node graph conventions, and output paths when available.\n5. Output a short plan and deterministic verification steps.\n\n### Scope Rules\n- Keep edits narrowly scoped to the request.\n- Do not restructure entire comp trees for narrow fixes.\n- Do not run broad disk scans outside projectRoot/configured source paths.\n- Do not search user-wide temp/home folders to rediscover known attachment names.\n- If reference images/files are attached, use the provided context path(s) directly.\n- Use `[value root.name]` for project-relative paths in Write nodes.\n\n---\n\n### Execution Rules\n\nAll Python commands are executed in the main thread via `nuke.executeInMainThread()` for thread safety.\nTCL commands are executed via `nuke.tcl()`.\nPython execution context persists across commands — variables and node refs survive between execute_command calls.\n\n### Execution Loop\n\n1. Write focused Python script using the `nuke` module and bridge helpers.\n2. Execute it.\n3. Read output and fix errors.\n4. Verify state with a follow-up check script.\n5. Repeat until checks pass.\n\nLimit fix loops to 3 attempts before reporting a blocker.\n\n---\n\n### Quality Checks (Required)\n\nAfter each major edit, verify and print:\n- target nodes exist with expected names/types (use `_ark_find_node()` or class-filtered `allNodes()`)\n- node connections are correct (use `node.dependent()` / `node.dependencies()` for reliable checks)\n- Read/Write node file paths are valid\n- frame ranges are set correctly\n- key knob values match expectations (TCL `value nodename.knobname` is most reliable)\n- renders complete successfully when applicable\n\n### Node Graph Conventions\n- Flow top-to-bottom (Read at top, Write at bottom)\n- Background on left (B input), foreground on right (A input)\n- Use Dot nodes for clean routing\n- Use Backdrop nodes with labels for sections\n- Name nodes descriptively: `{element}_{operation}` (e.g., `fg_grade`, `bg_despill`)\n\n### Resource Contention Rule\n- Treat renders and heavy DeepImage operations as `gpu_vram_heavy`.\n- Do not overlap heavy Nuke tasks with other GPU-heavy bridge operations on the same worker.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n1. Print script path and task type.\n2. Print changed/created nodes and connections.\n3. Print PASS/FAIL validation summary.\n4. Print output paths and caveats.\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success without deterministic checks.\n- Do not use Bash/Write/Edit for Nuke node graph mutation -- use bridge execution.\n- Do not rely on `nuke.allNodes()` without class filter for node counting.\n- Do not cache node references without re-acquiring via `_ark_find_node()` when stale.",
+  "ci": {
+    "dir": "nuke",
+    "include": [
+      "arkestrator_bridge/"
+    ]
+  },
+  "coordinatorSkill": "nuke/skills/coordinator/SKILL.md"
+}

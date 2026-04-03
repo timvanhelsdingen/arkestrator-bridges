@@ -1,0 +1,83 @@
+{
+  "id": "unreal",
+  "name": "Unreal Engine 5 Bridge",
+  "description": "Hybrid C++/Python plugin for UE5 — Blueprint graph menu hooks, context capture, file apply, command execution",
+  "author": "Arkestrator",
+  "official": true,
+  "stability": "experimental",
+  "minArkestrator": "0.1.40",
+  "program": "unreal",
+  "installType": "engine",
+  "platforms": [
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "repo": "timvanhelsdingen/arkestrator-bridges",
+  "asset": "arkestrator-bridge-unreal-v{version}.zip",
+  "sourceDir": "bridges/unreal",
+  "extractRoot": "ArkestratorBridge",
+  "installPath": {
+    "windows": "C:/Program Files/Epic Games/UE_{appVersion}/Engine/Plugins/ArkestratorBridge",
+    "macos": "/Users/Shared/Epic Games/UE_{appVersion}/Engine/Plugins/ArkestratorBridge",
+    "linux": "~/UnrealEngine/Engine/Plugins/ArkestratorBridge"
+  },
+  "detect": {
+    "windows": [
+      "C:/Program Files/Epic Games/UE_*/"
+    ],
+    "macos": [
+      "/Users/Shared/Epic Games/UE_*/"
+    ],
+    "linux": [
+      "~/UnrealEngine/"
+    ]
+  },
+  "headless": {
+    "executable": "UnrealEditor-Cmd",
+    "argsTemplate": [],
+    "language": "python",
+    "detect": {
+      "windows": [
+        "C:/Program Files/Epic Games/UE_*/Engine/Binaries/Win64/UnrealEditor-Cmd.exe"
+      ],
+      "linux": [
+        "/opt/UnrealEngine/Engine/Binaries/Linux/UnrealEditor-Cmd"
+      ]
+    }
+  },
+  "coordinatorScript": "## Unreal Engine Agent - General Editor Coordinator\n\nYou are connected to Unreal through Arkestrator.\nUse `execute_command(target=\"unreal\", language=\"python\", script=\"...\")` for Python,\nor `language=\"ue_console\"` for console commands.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Unreal Python API: https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/\n- Unreal editor Python scripting: https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python\n- Unreal console commands reference: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-console-commands-reference\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore execution:\n1. Review pre-loaded context (level, assets, project state).\n2. Check matched project scripts/docs from repo/client source paths.\n3. Classify task type (level/layout, asset pipeline, gameplay tooling, debug/fix).\n4. Reuse existing asset/path conventions when references exist.\n5. Output a short plan and verification checks.\n\n### Scope Rules\n- Keep edits request-scoped.\n- Prefer targeted asset/actor operations.\n- Avoid broad machine-wide scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n\n---\n\n### Execution Loop\n\n1. Write focused Python/console command.\n2. Execute.\n3. Fix errors immediately.\n4. Verify actor/asset state.\n5. Repeat until checks pass (max 3 fix loops).\n\nUse `/Game/...` paths consistently for content operations.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- verify created/edited actors/assets exist and are valid\n- verify properties/locations/paths match request\n- save required assets/levels\n- report explicit PASS evidence\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success without deterministic checks.",
+  "skills": [
+    {
+      "slug": "blueprint-patterns",
+      "file": "unreal/skills/blueprint-patterns/SKILL.md",
+      "title": "Blueprint Patterns",
+      "category": "bridge"
+    },
+    {
+      "slug": "cpp-gameplay",
+      "file": "unreal/skills/cpp-gameplay/SKILL.md",
+      "title": "C++ Gameplay Patterns",
+      "category": "bridge"
+    },
+    {
+      "slug": "level-design",
+      "file": "unreal/skills/level-design/SKILL.md",
+      "title": "Level Design",
+      "category": "bridge"
+    },
+    {
+      "slug": "verification",
+      "file": "unreal/skills/verification/SKILL.md",
+      "title": "Verification & Quality Assessment",
+      "category": "bridge"
+    }
+  ],
+  "ci": {
+    "dir": "unreal",
+    "include": [
+      "ArkestratorBridge/"
+    ]
+  },
+  "coordinatorSkill": "unreal/skills/coordinator/SKILL.md"
+}

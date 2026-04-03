@@ -1,0 +1,98 @@
+{
+  "id": "blender",
+  "name": "Blender Bridge",
+  "description": "Python addon for Blender 4.2+ — context capture, file apply, command execution",
+  "author": "Arkestrator",
+  "official": true,
+  "stability": "stable",
+  "minArkestrator": "0.1.40",
+  "program": "blender",
+  "installType": "user",
+  "platforms": [
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "repo": "timvanhelsdingen/arkestrator-bridges",
+  "asset": "arkestrator-bridge-blender-v{version}.zip",
+  "sourceDir": "bridges/blender",
+  "extractRoot": "arkestrator_bridge",
+  "skills": [
+    {
+      "slug": "materials-and-shading",
+      "file": "blender/skills/materials-and-shading/SKILL.md",
+      "title": "Materials & Shading",
+      "category": "bridge"
+    },
+    {
+      "slug": "rendering",
+      "file": "blender/skills/rendering/SKILL.md",
+      "title": "Rendering",
+      "category": "bridge"
+    },
+    {
+      "slug": "modeling",
+      "file": "blender/skills/modeling/SKILL.md",
+      "title": "Modeling",
+      "category": "bridge"
+    },
+    {
+      "slug": "verification",
+      "file": "blender/skills/verification/SKILL.md",
+      "title": "Verification & Quality Assessment",
+      "category": "bridge"
+    },
+    {
+      "slug": "python-api",
+      "file": "blender/skills/python-api/SKILL.md",
+      "title": "Python Api",
+      "category": "bridge"
+    }
+  ],
+  "installPath": {
+    "windows": "%APPDATA%/Blender Foundation/Blender/{appVersion}/scripts/addons/arkestrator_bridge",
+    "macos": "~/Library/Application Support/Blender/{appVersion}/scripts/addons/arkestrator_bridge",
+    "linux": "~/.config/blender/{appVersion}/scripts/addons/arkestrator_bridge"
+  },
+  "detect": {
+    "windows": [
+      "%APPDATA%/Blender Foundation/Blender/"
+    ],
+    "macos": [
+      "~/Library/Application Support/Blender/"
+    ],
+    "linux": [
+      "~/.config/blender/"
+    ]
+  },
+  "headless": {
+    "executable": "blender",
+    "argsTemplate": [
+      "--background",
+      "--python",
+      "{{SCRIPT_FILE}}"
+    ],
+    "language": "python",
+    "detect": {
+      "windows": [
+        "C:/Program Files/Blender Foundation/Blender */blender.exe",
+        "C:/Program Files/Blender Foundation/Blender/blender.exe"
+      ],
+      "macos": [
+        "/Applications/Blender.app/Contents/MacOS/Blender"
+      ],
+      "linux": [
+        "/usr/bin/blender",
+        "/snap/bin/blender"
+      ]
+    }
+  },
+  "coordinatorScript": "## Blender Agent - General bpy Coordinator\n\nYou are connected to a live Blender session through Arkestrator.\nUse `execute_command(target=\"blender\", language=\"python\", script=\"...\")`.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- Blender Python API: https://docs.blender.org/api/current/\n- Blender best practices: https://docs.blender.org/api/current/info_best_practice.html\n- Blender operators: https://docs.blender.org/api/current/bpy.ops.html\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec blender --lang python --script '<code>'` or `am exec blender --lang python -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore mutating anything:\n1. Review pre-loaded context and identify target scene/objects.\n2. Classify task type (modeling, layout, shading, rigging, animation, render, pipeline/fix).\n3. Check matched project scripts/docs from repo/client source paths.\n4. Reuse project naming, hierarchy, materials, and export conventions when available.\n5. Output a short plan and deterministic verification steps.\n\n### Scope Rules\n- Keep edits narrowly scoped to the request.\n- Do not rebuild unrelated scene systems.\n- Do not run broad disk scans outside projectRoot/configured source paths.\n- Do not search user-wide temp/home folders to rediscover known attachment names.\n- If reference images/files are attached, use the provided context path(s) directly.\n\n---\n\n### Execution Loop\n\n1. Write focused bpy script.\n2. Execute it.\n3. Read output and fix errors.\n4. Verify state with a follow-up check script.\n5. Repeat until checks pass.\n\nLimit fix loops to 3 attempts before reporting a blocker.\n\n---\n\n### Quality Checks (Required)\n\nAfter each major edit, verify and print:\n- target objects exist with expected names/types\n- transforms/modifiers/material assignments are correct\n- exports exist at expected paths and have non-zero size (if requested)\n- scene save status if persistence is required\n- rendered outputs exist and match requested frame/format settings (if requested)\n\n### Resource Contention Rule\n- Treat renders, bake jobs, and heavy viewport/GPU operations as `gpu_vram_heavy`.\n- Never intentionally start a Blender render/bake on a worker that is already busy with another Blender/Houdini/ComfyUI heavy GPU task.\n- If you need generation/render work in parallel, split it onto another worker or finish the current heavy task first.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n1. Run deterministic validation scripts.\n2. Confirm generated assets/files are usable.\n3. Fix and re-verify on failure (up to 3 attempts).\n4. Report success only with explicit PASS evidence.\n\n### Prohibited\n- Do not skip verification.\n- Do not claim success from assumptions.\n- Do not use Bash/Write/Edit for Blender scene mutation.",
+  "ci": {
+    "dir": "blender",
+    "include": [
+      "arkestrator_bridge/"
+    ]
+  },
+  "coordinatorSkill": "blender/skills/coordinator/SKILL.md"
+}

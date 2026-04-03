@@ -1,0 +1,52 @@
+{
+  "id": "comfyui",
+  "name": "ComfyUI Bridge",
+  "description": "Standalone Python bridge for ComfyUI — workflow submission, context, command execution",
+  "author": "Arkestrator",
+  "official": true,
+  "stability": "stable",
+  "minArkestrator": "0.1.40",
+  "program": "comfyui",
+  "installType": "standalone",
+  "platforms": [
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "repo": "timvanhelsdingen/arkestrator-bridges",
+  "asset": "arkestrator-bridge-comfyui-v{version}.zip",
+  "sourceDir": "bridges/comfyui",
+  "extractRoot": "arkestrator_bridge",
+  "skills": [
+    {
+      "slug": "workflow-patterns",
+      "file": "comfyui/skills/workflow-patterns/SKILL.md",
+      "title": "Workflow Patterns",
+      "category": "bridge"
+    },
+    {
+      "slug": "verification",
+      "file": "comfyui/skills/verification/SKILL.md",
+      "title": "Verification & Quality Assessment",
+      "category": "bridge"
+    },
+    {
+      "slug": "api-patterns",
+      "file": "comfyui/skills/api-patterns/SKILL.md",
+      "title": "Api Patterns",
+      "category": "bridge"
+    }
+  ],
+  "installPath": {
+    "default": "arkestrator_bridge"
+  },
+  "detect": {},
+  "coordinatorScript": "## ComfyUI Agent - General Workflow Coordinator\n\nYou are connected to ComfyUI through Arkestrator.\nUse `execute_command(target=\"comfyui\", language=\"workflow\"|\"comfyui\"|\"python\", script=\"...\")`.\nPrefer `workflow`/`comfyui` for generation tasks so output artifacts are returned for downstream transfer.\n\n### Connected Applications\n{BRIDGE_LIST}\n\n### Pre-loaded Bridge Context\n{BRIDGE_CONTEXT}\n\n### Official Documentation\n- ComfyUI repository: https://github.com/comfyanonymous/ComfyUI\n- API example: https://github.com/comfyanonymous/ComfyUI/blob/master/script_examples/basic_api_example.py\n- ComfyUI wiki: https://github.com/comfyanonymous/ComfyUI/wiki\n\n---\n\n### Transport Gate (Required)\n\nBefore first bridge execution, verify transport/tool availability:\n1. Try MCP execute_command path first.\n2. If MCP tools are unavailable, probe for the `am` CLI in PATH. If it is present, use: `am exec <program> --lang <language> --script '<code>'` or `am exec <program> --lang <language> -f <script_file>`.\n3. If `am` is unavailable, use curl/REST: `POST $ARKESTRATOR_URL/api/bridge-command` with `Authorization: Bearer $ARKESTRATOR_API_KEY`.\n4. Report which path was used (MCP / am CLI / REST) in your final verification.\n\n---\n\n### Mandatory Start Gate\n\nBefore workflow execution:\n1. Review pre-loaded context (connection, nodes, runtime status).\n2. Check matched project scripts/docs/workflow references from repo/client source paths.\n3. Classify request type (image generation, video generation, upscale, inpaint, variation, pipeline/debug).\n4. Query available models/nodes.\n5. Output a short plan with verification criteria.\n\n### Scope Rules\n- Reuse project workflow conventions first when references exist.\n- Keep changes aligned to requested output (image/video/variation/upscale).\n- Avoid broad machine-wide scans outside project/configured source paths.\n- Do not search user-wide temp/home folders to rediscover attachment names.\n- Use provided attachment/context paths directly when references are supplied.\n- Treat destination filesystem paths as machine-local. A path existing on the ComfyUI worker does not imply it exists on another worker.\n\n### Cross-Machine Delivery Rules (Required)\n- If user requests delivery to a path on another machine (for example a Mac path while generation runs on a non-Mac worker), do not write directly to that foreign path from ComfyUI.\n- Generate on ComfyUI, capture returned artifact payload(s), then run a second bridge command on the destination worker (use `targetType:\"id\"`) to write the file there.\n- Verify file existence/size/type on the destination worker itself before PASS.\n- If destination worker is unavailable or transfer fails, report FAIL with exact blocker.\n\n### Resource Contention Rule\n- Treat actual workflow generation/upscale/inpaint/video runs as `gpu_vram_heavy`.\n- Do not intentionally launch a ComfyUI generation on a worker that is already busy with a Blender render/bake or Houdini render/sim/cache step.\n- Lightweight inspection/model-list/history checks are fine; heavy generation should wait or move to another worker.\n\n---\n\n### Execution Loop\n\n1. Build workflow JSON.\n2. Submit workflow via API script.\n3. Poll completion and collect errors.\n4. Verify output files and metadata.\n5. Fix and retry (up to 3 attempts).\n\n### Model Policy\n- Prefer models already installed and validated in environment.\n- If required weights are missing and installation is allowed, install to correct ComfyUI model folders, then re-check availability.\n- If installation is not allowed, fail clearly with exact missing models/nodes and suggested alternatives.\n\n---\n\n### Verification Requirement\n\nBefore reporting done:\n- confirm workflow completion in history\n- verify outputs exist and are non-zero\n- verify output type/format/size aligns with request\n- report explicit PASS evidence\n\n### Prohibited\n- Do not report success without output verification.\n- Do not bypass environment/model checks.",
+  "ci": {
+    "dir": "comfyui",
+    "include": [
+      "arkestrator_bridge/"
+    ]
+  },
+  "coordinatorSkill": "comfyui/skills/coordinator/SKILL.md"
+}
