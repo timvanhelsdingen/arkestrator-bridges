@@ -557,7 +557,7 @@ namespace ArkestratorBridge
             var result = ArkestratorCommandExecutor.ExecuteCommands(commands);
             Debug.Log($"[ArkestratorBridge] bridge_command from {senderId}: executed={result.Executed} failed={result.Failed}");
 
-            SendEnvelope("bridge_command_result", new Dictionary<string, object?>
+            var resultPayload = new Dictionary<string, object?>
             {
                 ["senderId"] = senderId,
                 ["correlationId"] = correlationId,
@@ -566,7 +566,12 @@ namespace ArkestratorBridge
                 ["failed"] = result.Failed,
                 ["skipped"] = result.Skipped,
                 ["errors"] = result.Errors.Cast<object?>().ToList(),
-            });
+            };
+            if (!string.IsNullOrEmpty(result.Stdout))
+                resultPayload["stdout"] = result.Stdout;
+            if (!string.IsNullOrEmpty(result.Stderr))
+                resultPayload["stderr"] = result.Stderr;
+            SendEnvelope("bridge_command_result", resultPayload);
         }
 
         private static void HandleBridgeCommandResult(Dictionary<string, object?> payload)

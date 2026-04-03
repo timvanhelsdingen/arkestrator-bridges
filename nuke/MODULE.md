@@ -79,13 +79,15 @@ File attachments: Python callback scripts, expression knobs, and BlinkScript ker
 - **TCL**: `nuke.tcl(script)` - returns result string
 - **NK**: `nuke.nodePaste(script)` - pastes Nuke script snippet as nodes
 - Unsupported languages are skipped with error message
+- Returns `{"executed": int, "failed": int, "skipped": int, "errors": list[str], "stdout": str, "stderr": str}`
+- `stdout` and `stderr` capture the respective output streams during command execution
 
 ## Menu Integration
 - **Top-level menu**: `Nuke > Arkestrator` with Add Nodes/Viewer/Script to Context, Connect/Disconnect
 - **Node Graph right-click**: `Arkestrator` submenu with Add Nodes and Viewer context actions
 
 ## Protocol Messages
-Same protocol as other bridges -- see `bridges/blender/MODULE.md` for full reference.
+Same protocol as other bridges -- see `bridges/blender/MODULE.md` for full reference. Notably, `bridge_command_result` messages include optional `stdout` and `stderr` fields when non-empty, and `send_bridge_command_result()` accepts optional `stdout` and `stderr` parameters.
 
 ## Differences from Other Bridges
 | Aspect | Blender | Houdini | Nuke |

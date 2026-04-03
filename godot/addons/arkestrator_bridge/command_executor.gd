@@ -45,6 +45,8 @@ static func execute_commands(commands: Array, editor_interface: EditorInterface)
 		"failed": failed,
 		"skipped": skipped,
 		"errors": errors,
+		"stdout": "",
+		"stderr": "",
 	}
 
 

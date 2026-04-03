@@ -332,7 +332,8 @@ class WebSocketClient:
     def send_bridge_command_result(self, sender_id: str, correlation_id: str,
                                    success: bool, executed: int, failed: int,
                                    skipped: int, errors: list[str],
-                                   outputs: list[dict] | None = None) -> None:
+                                   outputs: list[dict] | None = None,
+                                   stdout: str = "", stderr: str = "") -> None:
         """Send bridge command execution results back to server for routing."""
         payload = {
             "senderId": sender_id,
@@ -345,6 +346,10 @@ class WebSocketClient:
         }
         if outputs:
             payload["outputs"] = outputs
+        if stdout:
+            payload["stdout"] = stdout
+        if stderr:
+            payload["stderr"] = stderr
         self.send_message({
             "type": "bridge_command_result",
             "id": str(uuid.uuid4()),

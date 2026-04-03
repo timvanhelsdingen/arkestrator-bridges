@@ -135,6 +135,8 @@ def _handle_bridge_command(payload: dict):
     skipped = result.get("skipped", 0)
     errors = result.get("errors", [])
     outputs = result.get("outputs", [])
+    stdout = result.get("stdout", "")
+    stderr = result.get("stderr", "")
 
     print(f"[ArkestratorBridge] Result: {executed} executed, {failed} failed, {skipped} skipped, {len(outputs)} output(s)")
 
@@ -143,6 +145,7 @@ def _handle_bridge_command(payload: dict):
     if _ws_client:
         _ws_client.send_bridge_command_result(
             sender_id, correlation_id, failed == 0, executed, failed, skipped, errors, metadata_outputs,
+            stdout=stdout, stderr=stderr,
         )
 
 

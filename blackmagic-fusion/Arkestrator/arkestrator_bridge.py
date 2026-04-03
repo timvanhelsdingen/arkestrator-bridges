@@ -496,7 +496,7 @@ class FusionBridge:
         result = execute_commands(self.fusion, comp, commands, self._log)
 
         # Send result back
-        self._ws.send("bridge_command_result", {
+        payload = {
             "senderId": sender_id,
             "correlationId": correlation_id,
             "success": result["success"],
@@ -504,7 +504,12 @@ class FusionBridge:
             "failed": result["failed"],
             "skipped": result["skipped"],
             "errors": result["errors"],
-        })
+        }
+        if result.get("stdout"):
+            payload["stdout"] = result["stdout"]
+        if result.get("stderr"):
+            payload["stderr"] = result["stderr"]
+        self._ws.send("bridge_command_result", payload)
 
     def _handle_file_read_request(self, msg):
         """Handle bridge_file_read_request — read local files and send back to server."""

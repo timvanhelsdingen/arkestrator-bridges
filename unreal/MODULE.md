@@ -48,6 +48,7 @@ bridges/unreal/
 - Auto-reconnect: exponential backoff 3s → 30s, 10s stability check
 - Shared-config auth/identity hot-reload: while reconnecting (and during read-loop timeout polls), client reloads `~/.arkestrator/config.json`; changed shared `apiKey`, followed `wsUrl`, `workerName`, or `machineId` triggers automatic reconnect using the updated credentials and canonical machine identity.
 - Remote-relay reconnect hardening: if the followed `wsUrl` is a desktop-owned loopback relay and that relay is unavailable during reconnect, the client now tries shared `remoteWsUrl` directly before giving up.
+- `send_bridge_command_result()` accepts optional `stdout` and `stderr` parameters, included in the WS message when non-empty
 - Close code 4001 handling (replaced connection, no reconnect)
 - Stale detection: 180s without frames triggers reconnect (`STALE_TIMEOUT_S`=180.0)
 - Handshake retry: up to 2 attempts (`HANDSHAKE_RETRY_ATTEMPTS`=2) with 0.5s delay
@@ -59,7 +60,7 @@ bridges/unreal/
 - Fallback project root: `unreal.Paths.project_dir()`
 
 ### command_executor.py
-- `execute_commands(commands)` - returns `{executed, failed, skipped, errors}`
+- `execute_commands(commands)` - returns `{executed, failed, skipped, errors, stdout, stderr}`
 - **Python** (`python`/`py`): `exec(compile(script))` with `unreal` in globals
 - **UE Console** (`ue_console`/`console`): `unreal.SystemLibrary.execute_console_command()`
 
@@ -101,7 +102,7 @@ bridges/unreal/
 - `bridge_context_clear` - clear stale context on connect
 - `bridge_context_item_add` - right-click "Add to Context" or toolbar button
 - `bridge_command_send` - cross-bridge commands
-- `bridge_command_result` - command execution results
+- `bridge_command_result` - command execution results (includes optional `stdout` and `stderr` fields when non-empty)
 
 ### Handled
 - `job_complete` - apply files or execute commands

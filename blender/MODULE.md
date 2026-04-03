@@ -108,7 +108,7 @@ Bridges are execution endpoints only. They do NOT submit jobs, display job manag
 | `send_context_clear()` | Tell server to clear context bag for this bridge (`bridge_context_clear`) |
 | `send_editor_context(editor_context, files)` | Push editor context snapshot (`bridge_editor_context`) |
 | `send_bridge_command(target, commands, target_type, correlation_id)` | Send commands to another bridge (`bridge_command_send`) |
-| `send_bridge_command_result(sender_id, correlation_id, success, executed, failed, skipped, errors)` | Send command execution results back (`bridge_command_result`) |
+| `send_bridge_command_result(sender_id, correlation_id, success, executed, failed, skipped, errors, stdout?, stderr?)` | Send command execution results back (`bridge_command_result`) |
 | `poll()` | Drain incoming queue -- call from main thread (bpy.app.timers) |
 
 ## Protocol Messages
@@ -120,7 +120,7 @@ Bridges are execution endpoints only. They do NOT submit jobs, display job manag
 | `bridge_context_clear` | Available via `ws_client.send_context_clear()` | `{}` |
 | `bridge_editor_context` | On connect + every 3s if changed (MD5 hash dedup) | `{ editorContext: {...}, files: [...] }` |
 | `bridge_command_send` | Cross-bridge command routing | `{ target, targetType, commands, correlationId? }` |
-| `bridge_command_result` | After executing a received bridge command | `{ senderId, correlationId, success, executed, failed, skipped, errors }` |
+| `bridge_command_result` | After executing a received bridge command | `{ senderId, correlationId, success, executed, failed, skipped, errors, stdout?, stderr? }` |
 
 ### Handled by Bridge
 | Message Type | Action | Scene Guard |
@@ -192,7 +192,8 @@ Multi-selection is grouped into a single context item where appropriate (`Select
 ## Command Execution (`command_executor.py`)
 - `execute_commands(commands)` -- filters for `python`/`py` language, skips unsupported
 - Executes via `exec(compile(code, "<agent_command: description>", "exec"), {"__builtins__": __builtins__, "bpy": bpy})`
-- Returns `{"executed": int, "failed": int, "skipped": int, "errors": list[str]}`
+- Returns `{"executed": int, "failed": int, "skipped": int, "errors": list[str], "stdout": str, "stderr": str}`
+- `stdout` and `stderr` capture the respective output streams during command execution
 - Errors include full traceback (`traceback.format_exc()`)
 
 ## Job Completion Handling (`__init__.py:_handle_job_complete()`)

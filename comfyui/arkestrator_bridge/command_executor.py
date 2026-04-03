@@ -6,7 +6,9 @@ Supports two command languages:
 """
 
 import base64
+import io
 import json
+import sys
 import traceback
 
 
@@ -53,6 +55,8 @@ def execute_commands(commands: list[dict], comfyui_client=None) -> dict:
     skipped = 0
     errors: list[str] = []
     outputs: list[dict] = []
+    stdout_parts: list[str] = []
+    stderr_parts: list[str] = []
 
     for cmd in commands:
         if not isinstance(cmd, dict):
@@ -82,7 +86,19 @@ def execute_commands(commands: list[dict], comfyui_client=None) -> dict:
                 if comfyui_client:
                     exec_globals["comfyui"] = comfyui_client
                 compiled = compile(script, f"<agent_command: {description}>", "exec")
-                exec(compiled, exec_globals)
+                old_stdout, old_stderr = sys.stdout, sys.stderr
+                sys.stdout = stdout_capture = io.StringIO()
+                sys.stderr = stderr_capture = io.StringIO()
+                try:
+                    exec(compiled, exec_globals)
+                finally:
+                    sys.stdout, sys.stderr = old_stdout, old_stderr
+                out = stdout_capture.getvalue()
+                err = stderr_capture.getvalue()
+                if out:
+                    stdout_parts.append(out)
+                if err:
+                    stderr_parts.append(err)
                 executed += 1
             except Exception as e:
                 failed += 1
@@ -99,6 +115,8 @@ def execute_commands(commands: list[dict], comfyui_client=None) -> dict:
         "skipped": skipped,
         "errors": errors,
         "outputs": outputs,
+        "stdout": "".join(stdout_parts),
+        "stderr": "".join(stderr_parts),
     }
 
 
