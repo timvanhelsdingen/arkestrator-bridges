@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 2,
-	"VersionName": "0.1.61",
+	"VersionName": "0.1.62",
 	"FriendlyName": "Arkestrator Bridge",
 	"Description": "Bridge plugin connecting Unreal Engine to the Arkestrator hub via Python. Receives jobs, executes Python/console commands, applies file changes, and pushes editor context.",
 	"Category": "Editor",
