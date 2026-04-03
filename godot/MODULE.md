@@ -84,7 +84,7 @@ Single panel (PanelContainer, no TabContainer) docked at `DOCK_SLOT_RIGHT_UL`:
 | `send_context_clear()` | `bridge_context_clear` | Clear the context bag on the server |
 | `send_editor_context(editor_context, files)` | `bridge_editor_context` | Push current editor context snapshot |
 | `send_bridge_command(target, commands, target_type, correlation_id)` | `bridge_command_send` | Send cross-bridge command |
-| `send_bridge_command_result(sender_id, correlation_id, success, executed, failed_count, skipped, errors)` | `bridge_command_result` | Reply to cross-bridge command |
+| `send_bridge_command_result(sender_id, correlation_id, success, executed, failed_count, skipped, errors, stdout?, stderr?)` | `bridge_command_result` | Reply to cross-bridge command |
 | `send_message(msg)` | (any) | Low-level: send raw dictionary as JSON |
 
 ### Removed Send Methods (submission moved to Tauri client)
@@ -115,7 +115,7 @@ Dispatches incoming messages by type:
 | `bridge_context_clear` | On WS connect (clears stale context) | `{}` |
 | `bridge_editor_context` | On connect + every 2s if changed | `{ editorContext, files }` |
 | `bridge_command_send` | Cross-bridge command dispatch | `{ target, targetType, commands, correlationId? }` |
-| `bridge_command_result` | Reply to received bridge command | `{ senderId, correlationId, success, executed, failed, skipped, errors }` |
+| `bridge_command_result` | Reply to received bridge command | `{ senderId, correlationId, success, executed, failed, skipped, errors, stdout?, stderr? }` |
 
 ## Editor Context Gathering (`plugin.gd:_build_editor_context()`)
 ```
@@ -171,7 +171,8 @@ Also gathers file attachments via `_gather_file_attachments()`: reads content of
 - Wraps bare code (no `func run(`) in `extends RefCounted\nfunc run(editor: EditorInterface) -> void:\n\t...`
 - Ensures script has `extends` declaration
 - Compiles via `GDScript.new()` + `reload()`, instantiates, calls `run(editor_interface)`
-- Returns `{ executed, failed, skipped, errors }`
+- Returns `{ executed, failed, skipped, errors, stdout, stderr }`
+- `stdout` and `stderr` capture the respective output streams during command execution
 
 ## Job Completion Handling (`_on_job_complete`)
 On `job_complete` signal:

@@ -5,6 +5,8 @@ Executes Python and Lua scripts inside the Fusion runtime.
 Supports both standalone Fusion and DaVinci Resolve's Fusion page.
 """
 
+import io
+import sys
 import traceback
 
 # Languages this bridge supports
@@ -24,6 +26,8 @@ def execute_commands(fusion_app, comp, commands, logger=None):
     failed = 0
     skipped = 0
     errors = []
+    stdout_parts = []
+    stderr_parts = []
 
     for cmd in commands:
         language = (cmd.get("language") or "").lower().strip()
@@ -44,10 +48,22 @@ def execute_commands(fusion_app, comp, commands, logger=None):
         log(f"[exec] Running {language}: {description or script[:60]}...")
 
         try:
-            if language in ("lua", "fusion_lua"):
-                _execute_lua(fusion_app, comp, script)
-            else:
-                _execute_python(fusion_app, comp, script)
+            old_stdout, old_stderr = sys.stdout, sys.stderr
+            sys.stdout = stdout_capture = io.StringIO()
+            sys.stderr = stderr_capture = io.StringIO()
+            try:
+                if language in ("lua", "fusion_lua"):
+                    _execute_lua(fusion_app, comp, script)
+                else:
+                    _execute_python(fusion_app, comp, script)
+            finally:
+                sys.stdout, sys.stderr = old_stdout, old_stderr
+            out = stdout_capture.getvalue()
+            err = stderr_capture.getvalue()
+            if out:
+                stdout_parts.append(out)
+            if err:
+                stderr_parts.append(err)
             executed += 1
             log(f"[exec] Success: {description or 'script'}")
         except Exception as exc:
@@ -63,6 +79,8 @@ def execute_commands(fusion_app, comp, commands, logger=None):
         "failed": failed,
         "skipped": skipped,
         "errors": errors,
+        "stdout": "".join(stdout_parts),
+        "stderr": "".join(stderr_parts),
     }
 
 

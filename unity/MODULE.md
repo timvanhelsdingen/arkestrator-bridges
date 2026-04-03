@@ -44,6 +44,7 @@ Repository utility script:
 - `ClientWebSocket` transport with reconnect backoff (3s -> 30s)
 - Thread-safe send queue + main-thread event queue
 - Poll-based dispatch from Unity editor update loop
+- `SendBridgeCommandResult()` accepts optional `stdout` and `stderr` parameters; `bridge_command_result` messages include these fields when non-empty
 
 ### ArkestratorCommandExecutor.cs
 - Executes command payloads with `language="unity_json"` (or `"json"`)
@@ -56,6 +57,8 @@ Repository utility script:
   - `save_scenes`
   - `select_asset`
   - `refresh_assets`
+- Returns result dict with `executed`, `failed`, `skipped`, `errors`, `stdout`, and `stderr` fields
+- `stdout` and `stderr` capture the respective output streams during command execution
 - Uses editor-safe APIs (`Undo`, `EditorSceneManager`, `AssetDatabase`, `Selection`)
 
 ### ArkestratorFileApplier.cs

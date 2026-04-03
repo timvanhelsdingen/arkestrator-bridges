@@ -103,9 +103,11 @@ File attachments: Python SOP code and wrangle VEX snippets from selected nodes.
 - **Python**: `exec(compile(...))` with `hou` in globals
 - **HScript**: `hou.hscript(script)` - captures stderr as warnings
 - Unsupported languages are skipped with error message
+- Returns `{"executed": int, "failed": int, "skipped": int, "errors": list[str], "stdout": str, "stderr": str}`
+- `stdout` and `stderr` capture the respective output streams during command execution
 
 ## Protocol Messages
-Same as Blender bridge - see `bridges/blender/MODULE.md` for full protocol reference.
+Same as Blender bridge - see `bridges/blender/MODULE.md` for full protocol reference. Notably, `bridge_command_result` messages include optional `stdout` and `stderr` fields when non-empty, and `send_bridge_command_result()` accepts optional `stdout` and `stderr` parameters.
 
 ## Differences from Blender Bridge
 | Aspect | Blender | Houdini |

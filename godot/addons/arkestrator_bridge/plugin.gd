@@ -543,9 +543,11 @@ func _on_bridge_command_received(sender_id: String, commands: Array, correlation
 	var cmd_failed := int(result.get("failed", 0))
 	var cmd_skipped := int(result.get("skipped", 0))
 	var cmd_errors: Array = result.get("errors", [])
+	var cmd_stdout: String = str(result.get("stdout", ""))
+	var cmd_stderr: String = str(result.get("stderr", ""))
 
 	print("[ArkestratorBridge] Result: %d executed, %d failed, %d skipped" % [executed, cmd_failed, cmd_skipped])
-	_ws_client.send_bridge_command_result(sender_id, correlation_id, cmd_failed == 0, executed, cmd_failed, cmd_skipped, cmd_errors)
+	_ws_client.send_bridge_command_result(sender_id, correlation_id, cmd_failed == 0, executed, cmd_failed, cmd_skipped, cmd_errors, cmd_stdout, cmd_stderr)
 
 
 func _on_bridge_command_result_received(bridge_id: String, program: String, correlation_id: String, success: bool, executed: int, failed_count: int, skipped: int, errors: Array) -> void:

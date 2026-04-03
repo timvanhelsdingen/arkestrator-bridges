@@ -1,5 +1,7 @@
 """Execute Python commands received from completed agent jobs."""
 
+import io
+import sys
 import traceback
 
 
@@ -8,7 +10,7 @@ def execute_commands(commands: list[dict]) -> dict:
 
     Each command has: language, script, description (optional).
     Only 'python'/'py' language is supported.
-    Returns {"executed": int, "failed": int, "skipped": int, "errors": list[str]}.
+    Returns {"executed": int, "failed": int, "skipped": int, "errors": list[str], "stdout": str, "stderr": str}.
     """
     import bpy
 
@@ -16,6 +18,8 @@ def execute_commands(commands: list[dict]) -> dict:
     failed = 0
     skipped = 0
     errors: list[str] = []
+    stdout_parts: list[str] = []
+    stderr_parts: list[str] = []
 
     for cmd in commands:
         if not isinstance(cmd, dict):
@@ -42,7 +46,19 @@ def execute_commands(commands: list[dict]) -> dict:
                 "bpy": bpy,
             }
             compiled = compile(script, f"<agent_command: {description}>", "exec")
-            exec(compiled, exec_globals)
+            old_stdout, old_stderr = sys.stdout, sys.stderr
+            sys.stdout = stdout_capture = io.StringIO()
+            sys.stderr = stderr_capture = io.StringIO()
+            try:
+                exec(compiled, exec_globals)
+            finally:
+                sys.stdout, sys.stderr = old_stdout, old_stderr
+            out = stdout_capture.getvalue()
+            err = stderr_capture.getvalue()
+            if out:
+                stdout_parts.append(out)
+            if err:
+                stderr_parts.append(err)
             executed += 1
         except Exception as e:
             failed += 1
@@ -54,4 +70,6 @@ def execute_commands(commands: list[dict]) -> dict:
         "failed": failed,
         "skipped": skipped,
         "errors": errors,
+        "stdout": "".join(stdout_parts),
+        "stderr": "".join(stderr_parts),
     }

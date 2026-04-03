@@ -174,15 +174,17 @@ def _handle_bridge_command(payload: dict):
         failed = result.get("failed", 0)
         skipped = result.get("skipped", 0)
         errors = result.get("errors", [])
-        output = result.get("output", "")
+        stdout = result.get("stdout", "")
+        stderr = result.get("stderr", "")
 
         print(f"[ArkestratorBridge] Result: {executed} executed, {failed} failed, {skipped} skipped")
-        if output:
-            print(f"[ArkestratorBridge] Output:\n{output}")
+        if stdout:
+            print(f"[ArkestratorBridge] Output:\n{stdout}")
 
         if _ws_client:
             _ws_client.send_bridge_command_result(
                 sender_id, correlation_id, failed == 0, executed, failed, skipped, errors,
+                stdout=stdout, stderr=stderr,
             )
 
     nuke.executeInMainThread(_exec)

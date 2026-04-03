@@ -14,6 +14,8 @@ namespace ArkestratorBridge
             public int Failed;
             public int Skipped;
             public readonly List<string> Errors = new();
+            public string Stdout = "";
+            public string Stderr = "";
         }
 
         public static ExecutionResult ExecuteCommands(List<object?>? commands)
@@ -23,6 +25,19 @@ namespace ArkestratorBridge
             {
                 return result;
             }
+
+            var stdoutLines = new List<string>();
+            var stderrLines = new List<string>();
+            void LogHandler(string message, string stackTrace, LogType type)
+            {
+                if (type == LogType.Error || type == LogType.Exception)
+                    stderrLines.Add(message);
+                else
+                    stdoutLines.Add(message);
+            }
+            Application.logMessageReceived += LogHandler;
+            try
+            {
 
             foreach (var entry in commands)
             {
@@ -52,6 +67,16 @@ namespace ArkestratorBridge
                 result.Skipped++;
                 result.Errors.Add($"Unsupported language '{language}' (supported: unity_json/json)");
             }
+
+            }
+            finally
+            {
+                Application.logMessageReceived -= LogHandler;
+            }
+            if (stdoutLines.Count > 0)
+                result.Stdout = string.Join("\n", stdoutLines);
+            if (stderrLines.Count > 0)
+                result.Stderr = string.Join("\n", stderrLines);
 
             return result;
         }

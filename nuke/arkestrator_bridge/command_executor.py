@@ -5,9 +5,9 @@ so node references and variables survive between execute_command calls.
 Includes node graph synchronization to work around Nuke NC API quirks.
 """
 
+import io
 import sys
 import traceback
-import io
 
 # ---------------------------------------------------------------------------
 # Persistent session state
@@ -221,7 +221,7 @@ def execute_commands(commands: list[dict], *, new_session: bool = False) -> dict
 
     Returns:
         {"executed": int, "failed": int, "skipped": int,
-         "errors": list[str], "output": str}
+         "errors": list[str], "stdout": str, "stderr": str}
     """
     import nuke
 
@@ -234,7 +234,8 @@ def execute_commands(commands: list[dict], *, new_session: bool = False) -> dict
     failed = 0
     skipped = 0
     errors: list[str] = []
-    output_parts: list[str] = []
+    stdout_parts: list[str] = []
+    stderr_parts: list[str] = []
 
     for cmd in commands:
         if not isinstance(cmd, dict):
@@ -255,22 +256,22 @@ def execute_commands(commands: list[dict], *, new_session: bool = False) -> dict
                 _sync_node_graph()
 
                 # Capture stdout/stderr from the script
-                capture = io.StringIO()
-                old_stdout = sys.stdout
-                old_stderr = sys.stderr
-                sys.stdout = capture
-                sys.stderr = capture
+                old_stdout, old_stderr = sys.stdout, sys.stderr
+                sys.stdout = stdout_capture = io.StringIO()
+                sys.stderr = stderr_capture = io.StringIO()
 
                 try:
                     compiled = compile(script, f"<agent_command: {description}>", "exec")
                     exec(compiled, session)
                 finally:
-                    sys.stdout = old_stdout
-                    sys.stderr = old_stderr
+                    sys.stdout, sys.stderr = old_stdout, old_stderr
 
-                captured = capture.getvalue()
-                if captured:
-                    output_parts.append(captured)
+                out = stdout_capture.getvalue()
+                err = stderr_capture.getvalue()
+                if out:
+                    stdout_parts.append(out)
+                if err:
+                    stderr_parts.append(err)
 
                 executed += 1
             except Exception as e:
@@ -280,18 +281,19 @@ def execute_commands(commands: list[dict], *, new_session: bool = False) -> dict
 
                 # Capture any partial output
                 try:
-                    captured = capture.getvalue()
-                    if captured:
-                        output_parts.append(captured)
+                    out = stdout_capture.getvalue()
+                    err = stderr_capture.getvalue()
+                    if out:
+                        stdout_parts.append(out)
+                    if err:
+                        stderr_parts.append(err)
                 except Exception:
                     pass
         elif language == "tcl":
             try:
                 result = nuke.tcl(script)
                 if result:
-                    msg = f"TCL ({description}): {result}"
-                    print(f"[ArkestratorBridge] {msg}")
-                    output_parts.append(result)
+                    stdout_parts.append(str(result))
                 executed += 1
             except Exception as e:
                 failed += 1
@@ -312,5 +314,6 @@ def execute_commands(commands: list[dict], *, new_session: bool = False) -> dict
         "failed": failed,
         "skipped": skipped,
         "errors": errors,
-        "output": "\n".join(output_parts),
+        "stdout": "".join(stdout_parts),
+        "stderr": "".join(stderr_parts),
     }

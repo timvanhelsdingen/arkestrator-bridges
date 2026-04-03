@@ -83,19 +83,24 @@ func send_bridge_command(target: String, commands: Array, target_type: String = 
 	})
 
 
-func send_bridge_command_result(sender_id: String, correlation_id: String, success: bool, executed: int, failed_count: int, skipped: int, errors: Array) -> void:
+func send_bridge_command_result(sender_id: String, correlation_id: String, success: bool, executed: int, failed_count: int, skipped: int, errors: Array, stdout_text: String = "", stderr_text: String = "") -> void:
+	var payload := {
+		"senderId": sender_id,
+		"correlationId": correlation_id,
+		"success": success,
+		"executed": executed,
+		"failed": failed_count,
+		"skipped": skipped,
+		"errors": errors,
+	}
+	if stdout_text != "":
+		payload["stdout"] = stdout_text
+	if stderr_text != "":
+		payload["stderr"] = stderr_text
 	send_message({
 		"type": "bridge_command_result",
 		"id": _new_uuid(),
-		"payload": {
-			"senderId": sender_id,
-			"correlationId": correlation_id,
-			"success": success,
-			"executed": executed,
-			"failed": failed_count,
-			"skipped": skipped,
-			"errors": errors,
-		},
+		"payload": payload,
 	})
 
 

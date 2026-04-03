@@ -19,7 +19,7 @@ bridges/comfyui/
 ## Key Components
 
 ### ws_client.py
-Standard Arkestrator WebSocket client (stdlib only). Identical to Houdini bridge except `program="comfyui"`. Stale timeout: 180s (`STALE_TIMEOUT_S`). Handshake retry: up to 2 attempts (`HANDSHAKE_RETRY_ATTEMPTS`=2) with 0.5s delay. Reconnect lifecycle now matches Blender/Houdini hardening: old thread is stopped before clearing the stop-event, preventing reconnect dead-threads and stale bridge metadata. It now also hot-refreshes `~/.arkestrator/config.json` during reconnect/read-loop polling, follows client-owned shared `workerName`/`machineId`, sends `machineId` on the WebSocket query string, auto-reconnects when shared `apiKey`, followed `wsUrl`, or shared identity changes, and falls back from a dead desktop relay URL to shared `remoteWsUrl` during reconnect.
+Standard Arkestrator WebSocket client (stdlib only). Identical to Houdini bridge except `program="comfyui"`. `send_bridge_command_result()` accepts optional `stdout` and `stderr` parameters; `bridge_command_result` messages include these fields when non-empty. Stale timeout: 180s (`STALE_TIMEOUT_S`). Handshake retry: up to 2 attempts (`HANDSHAKE_RETRY_ATTEMPTS`=2) with 0.5s delay. Reconnect lifecycle now matches Blender/Houdini hardening: old thread is stopped before clearing the stop-event, preventing reconnect dead-threads and stale bridge metadata. It now also hot-refreshes `~/.arkestrator/config.json` during reconnect/read-loop polling, follows client-owned shared `workerName`/`machineId`, sends `machineId` on the WebSocket query string, auto-reconnects when shared `apiKey`, followed `wsUrl`, or shared identity changes, and falls back from a dead desktop relay URL to shared `remoteWsUrl` during reconnect.
 
 ### comfyui_client.py
 HTTP client wrapping ComfyUI's REST API:
@@ -35,6 +35,7 @@ HTTP client wrapping ComfyUI's REST API:
 Handles two command languages:
 - `"workflow"` / `"comfyui"` - submits workflow JSON to ComfyUI, polls for results, collects output artifacts (`images`, `videos`, `gifs`, `audio`, `files`) and infers stable `kind` values from filename extensions
 - `"python"` / `"py"` - executes Python code via `exec()` (ComfyUI client available as `comfyui` in scope)
+- Returns `{"executed": int, "failed": int, "skipped": int, "errors": list[str], "stdout": str, "stderr": str}` -- `stdout` and `stderr` capture the respective output streams during command execution
 
 Bridge command results now send transport-safe artifact payloads:
 - Always includes metadata (`filename`, `subfolder`, `type`, `sizeBytes`, `kind`, optional `mimeType`)
