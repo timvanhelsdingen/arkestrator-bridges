@@ -24,17 +24,25 @@ jobs:
           DIST="$GITHUB_WORKSPACE/dist"
           mkdir -p "$DIST"
 
-          # Data-driven packaging: reads each bridge's "ci" spec from registry.json.
-          # To add a new bridge to releases, just add it to registry.json with:
-          #   "ci": { "dir": "<local-dir>", "include": ["<path>/"], "exclude": ["*.pyc"] }
+          # Registry v2: each bridge has its own bridge.json in its directory.
+          # To add a new bridge to releases, create <dir>/bridge.json with a "ci" block.
 
-          jq -c '.bridges[]' registry.json | while IFS= read -r bridge; do
-            ID=$(echo "$bridge" | jq -r '.id')
+          jq -c '.bridges[]' registry.json | while IFS= read -r entry; do
+            ID=$(echo "$entry" | jq -r '.id')
+            BDIR=$(echo "$entry" | jq -r '.dir')
+            MANIFEST="$GITHUB_WORKSPACE/$BDIR/bridge.json"
+
+            if [ ! -f "$MANIFEST" ]; then
+              echo "⚠  Skipping $ID — no bridge.json in $BDIR"
+              continue
+            fi
+
+            bridge=$(cat "$MANIFEST")
             DIR=$(echo "$bridge" | jq -r '.ci.dir // empty')
             ASSET=$(echo "$bridge" | jq -r '.asset // empty')
 
             if [ -z "$DIR" ] || [ -z "$ASSET" ]; then
-              echo "⚠  Skipping $ID — no ci.dir or asset in registry.json"
+              echo "⚠  Skipping $ID — no ci.dir or asset in bridge.json"
               continue
             fi
 
@@ -72,3 +80,4 @@ jobs:
           files: |
             dist/arkestrator-bridge-*.zip
             registry.json
+            */bridge.json
