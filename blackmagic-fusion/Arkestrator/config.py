@@ -12,7 +12,7 @@ import getpass
 CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".arkestrator", "config.json")
 
 # Bridge identity
-BRIDGE_VERSION = "0.1.62"
+BRIDGE_VERSION = "0.1.63"
 PROGRAM = "fusion"
 
 
