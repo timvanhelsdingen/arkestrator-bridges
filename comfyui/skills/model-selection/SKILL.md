@@ -278,9 +278,10 @@ Request received
 
 ## Common Pitfalls
 
-1. **Using photorealistic models for textures** — produces photos of surfaces with perspective/depth instead of flat tileable textures
+1. **Using photorealistic models for textures** — produces photos of surfaces with perspective/depth instead of flat tileable textures. "Careful prompting" does NOT fix this — the model's training data determines what it can produce. DreamShaper, Juggernaut, RealVis etc. are WRONG for textures regardless of prompt.
 2. **Ignoring VRAM limits** — causes OOM crashes or silent quality degradation from aggressive offloading
 3. **Wrong resolution for the model** — SD1.5 trained at 512, SDXL at 1024, Flux at 1024+; wrong resolution = artifacts
 4. **Generic prompts** — "a wooden texture" is too vague; "seamless weathered oak wood planks, natural grain detail, scratches, flat surface, top-down view" is actionable
-5. **Not checking for specialized models** — a generic SDXL model will never match a texture-fine-tuned model for PBR output
-6. **Skipping tiling verification** — generating a "seamless" texture without verifying it actually tiles
+5. **Not checking for specialized models** — a generic SDXL model will never match a texture-fine-tuned model for PBR output. With 24GB VRAM and internet access, there is NO excuse for not downloading the right model.
+6. **Settling for SD1.5 on high-VRAM GPUs** — if you have 12GB+ VRAM, use SDXL or Flux. SD1.5 is 512x512 and significantly lower quality. Only use SD1.5 when VRAM is actually constrained.
+7. **Skipping tiling verification** — generating a "seamless" texture without verifying it actually tiles
