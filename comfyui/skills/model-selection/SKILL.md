@@ -32,18 +32,17 @@ vram_free  = mm.get_free_memory() / (1024**3)   # GB
 print(f"GPU VRAM: {vram_total:.1f} GB total, {vram_free:.1f} GB free")
 ```
 
-### VRAM Budget Rules
-| Available VRAM | Max Checkpoint | Max Resolution | Notes |
-|---------------|---------------|----------------|-------|
-| < 4 GB        | SD 1.5 (fp16) | 512x512       | Use `--lowvram` or `--cpu` offload |
-| 4-6 GB        | SD 1.5 / SDXL (fp16) | 512-768 | SDXL may need `--lowvram` |
-| 6-8 GB        | SDXL (fp16)   | 1024x1024     | Comfortable for SDXL |
-| 8-12 GB       | SDXL / Flux (fp8/nf4) | 1024-1536 | Flux needs quantized weights |
-| 12-16 GB      | Flux (fp16/fp8) | 1024-2048   | Good for most tasks |
-| 16-24 GB      | Flux / SD3.5 (fp16) | Up to 2048 | Full precision, large batches |
-| 24+ GB        | Any model     | Any resolution | No constraints |
+### VRAM Guidelines
+Use these as rough guidelines — actual usage varies by model, batch size, and workflow complexity:
 
-**Always check VRAM before selecting a model. Never try to load a model that won't fit.**
+| Available VRAM | Typical Fit | Notes |
+|---------------|------------|-------|
+| < 4 GB        | SD 1.5 (fp16) | May need `--lowvram` or `--cpu` offload |
+| 4-8 GB        | SD 1.5 / SDXL (fp16) | SDXL may need offloading at lower VRAM |
+| 8-12 GB       | SDXL / Flux (quantized) | Flux fp8/nf4 fits here |
+| 12+ GB        | Most models | Comfortable for full-precision workflows |
+
+**Always check VRAM before selecting a model. Never try to load a model that won't fit. But pick the best model for the task — not necessarily the biggest.**
 
 ---
 
@@ -283,5 +282,5 @@ Request received
 3. **Wrong resolution for the model** — SD1.5 trained at 512, SDXL at 1024, Flux at 1024+; wrong resolution = artifacts
 4. **Generic prompts** — "a wooden texture" is too vague; "seamless weathered oak wood planks, natural grain detail, scratches, flat surface, top-down view" is actionable
 5. **Not checking for specialized models** — a generic SDXL model will never match a texture-fine-tuned model for PBR output. With 24GB VRAM and internet access, there is NO excuse for not downloading the right model.
-6. **Settling for SD1.5 on high-VRAM GPUs** — if you have 12GB+ VRAM, use SDXL or Flux. SD1.5 is 512x512 and significantly lower quality. Only use SD1.5 when VRAM is actually constrained.
+6. **Ignoring available VRAM headroom** — if a better-suited model exists that fits your VRAM, use it. But don't force a larger model when a well-matched smaller one does the job — a texture-specialized SD1.5 model can outperform a generic SDXL model for that specific task.
 7. **Skipping tiling verification** — generating a "seamless" texture without verifying it actually tiles
