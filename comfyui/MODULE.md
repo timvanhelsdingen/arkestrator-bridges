@@ -93,5 +93,20 @@ if bridge:
     bridge.execute_workflow({"3": {"class_type": "KSampler", ...}})
 ```
 
+## Skills
+| Slug | Title | Description |
+|------|-------|-------------|
+| workflow-patterns | Workflow Patterns | Node creation, txt2img, PBR textures, upscale, inpaint, ControlNet workflow patterns |
+| verification | Verification & Quality Assessment | Python patterns for checking workflow completion, outputs, models |
+| api-patterns | Api Patterns | Workflow JSON structure, common nodes, model/delivery/scope policies |
+| model-selection | Model Selection & Task Intelligence | Hardware-aware model selection, task classification (textures/photos/art/video), model search & auto-download |
+
+The **model-selection** skill teaches the coordinator to:
+- Check GPU VRAM before selecting models
+- Classify requests into content types (PBR textures, photorealistic, concept art, video, upscale, inpaint)
+- Understand that different content types need fundamentally different models (e.g. texture models for PBR, not photorealistic models)
+- Search CivitAI/HuggingFace for task-specific models and download them
+- Install custom nodes when needed
+
 ## Config
 Auto-discovers from `~/.arkestrator/config.json`. In addition to `apiKey`/`wsUrl`, the bridge now also follows shared `workerName` and `machineId`. Optional `comfyuiUrl` field for ComfyUI address (defaults to `http://127.0.0.1:8188`).
